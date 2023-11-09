@@ -32,10 +32,12 @@ async function fetchAPI(
     configs: GReaderConfigs,
     params: string,
     method = "GET",
-    body: BodyInit = null
+    body: BodyInit = null,
 ) {
     const headers = new Headers()
-    if (configs.auth !== null) headers.set("Authorization", configs.auth)
+    if (configs.auth !== null) {
+        headers.set("Authorization", configs.auth)
+    }
     if (configs.type == SyncService.Inoreader) {
         if (configs.inoreaderId) {
             headers.set("AppId", configs.inoreaderId)
@@ -54,19 +56,21 @@ async function fetchAPI(
 
 async function fetchAll(
     configs: GReaderConfigs,
-    params: string
+    params: string,
 ): Promise<Set<string>> {
-    let results = new Array()
+    const results = []
     let fetched: any[]
     let continuation: string
     do {
         let p = params
-        if (continuation) p += `&c=${continuation}`
+        if (continuation) {
+            p += `&c=${continuation}`
+        }
         const response = await fetchAPI(configs, p)
         const parsed = await response.json()
         fetched = parsed.itemRefs
         if (fetched) {
-            for (let i of fetched) {
+            for (const i of fetched) {
                 results.push(i.id)
             }
         }
@@ -79,17 +83,19 @@ async function editTag(
     configs: GReaderConfigs,
     ref: string,
     tag: string,
-    add = true
+    add = true,
 ) {
     const body = new URLSearchParams(`i=${ref}&${add ? "a" : "r"}=${tag}`)
     return await fetchAPI(configs, "/reader/api/0/edit-tag", "POST", body)
 }
 
 function compactId(longId: string, useInt64: boolean) {
-    let parts = longId.split("/")
+    const parts = longId.split("/")
     const last = parts[parts.length - 1]
-    if (!useInt64) return last
-    let i = BigInt("0x" + last)
+    if (!useInt64) {
+        return last
+    }
+    const i = BigInt("0x" + last)
     return BigInt.asIntN(64, i).toString()
 }
 
@@ -101,7 +107,7 @@ export const gReaderServiceHooks: ServiceHooks = {
             try {
                 const result = await fetchAPI(
                     configs,
-                    "/reader/api/0/user-info"
+                    "/reader/api/0/user-info",
                 )
                 return result.status === 200
             } catch {
@@ -111,7 +117,7 @@ export const gReaderServiceHooks: ServiceHooks = {
     },
 
     reauthenticate: async (
-        configs: GReaderConfigs
+        configs: GReaderConfigs,
     ): Promise<GReaderConfigs> => {
         const body = new URLSearchParams()
         body.append("Email", configs.username)
@@ -120,13 +126,14 @@ export const gReaderServiceHooks: ServiceHooks = {
             configs,
             "/accounts/ClientLogin",
             "POST",
-            body
+            body,
         )
         if (result.status === 200) {
             const text = await result.text()
             const matches = text.match(/Auth=(\S+)/)
-            if (matches.length > 1)
+            if (matches.length > 1) {
                 configs.auth = "GoogleLogin auth=" + matches[1]
+            }
             return configs
         } else {
             throw APIError()
@@ -137,15 +144,17 @@ export const gReaderServiceHooks: ServiceHooks = {
         const configs = getState().service as GReaderConfigs
         const response = await fetchAPI(
             configs,
-            "/reader/api/0/subscription/list?output=json"
+            "/reader/api/0/subscription/list?output=json",
         )
-        if (response.status !== 200) throw APIError()
+        if (response.status !== 200) {
+            throw APIError()
+        }
         const subscriptions: any[] = (await response.json()).subscriptions
         let groupsMap: Map<string, string>
         if (configs.importGroups) {
             groupsMap = new Map()
             const groupSet = new Set<string>()
-            for (let s of subscriptions) {
+            for (const s of subscriptions) {
                 if (s.categories && s.categories.length > 0) {
                     const group: string = s.categories[0].label
                     if (!groupSet.has(group)) {
@@ -177,22 +186,22 @@ export const gReaderServiceHooks: ServiceHooks = {
             return await Promise.all([
                 fetchAll(
                     configs,
-                    `/reader/api/0/stream/items/ids?output=json&xt=${READ_TAG}&n=1000`
+                    `/reader/api/0/stream/items/ids?output=json&xt=${READ_TAG}&n=1000`,
                 ),
                 fetchAll(
                     configs,
-                    `/reader/api/0/stream/items/ids?output=json&it=${STAR_TAG}&n=1000`
+                    `/reader/api/0/stream/items/ids?output=json&it=${STAR_TAG}&n=1000`,
                 ),
             ])
         } else {
             return await Promise.all([
                 fetchAll(
                     configs,
-                    `/reader/api/0/stream/items/ids?output=json&s=${ALL_TAG}&xt=${READ_TAG}&n=1000`
+                    `/reader/api/0/stream/items/ids?output=json&s=${ALL_TAG}&xt=${READ_TAG}&n=1000`,
                 ),
                 fetchAll(
                     configs,
-                    `/reader/api/0/stream/items/ids?output=json&s=${STAR_TAG}&n=1000`
+                    `/reader/api/0/stream/items/ids?output=json&s=${STAR_TAG}&n=1000`,
                 ),
             ])
         }
@@ -201,19 +210,23 @@ export const gReaderServiceHooks: ServiceHooks = {
     fetchItems: () => async (_, getState) => {
         const state = getState()
         const configs = state.service as GReaderConfigs
-        const items = new Array()
+        const items = []
         let fetchedItems: any[]
         let continuation: string
         do {
             try {
                 const limit = Math.min(configs.fetchLimit - items.length, 1000)
                 let params = `/reader/api/0/stream/contents?output=json&n=${limit}`
-                if (configs.lastFetched) params += `&ot=${configs.lastFetched}`
-                if (continuation) params += `&c=${continuation}`
+                if (configs.lastFetched) {
+                    params += `&ot=${configs.lastFetched}`
+                }
+                if (continuation) {
+                    params += `&c=${continuation}`
+                }
                 const response = await fetchAPI(configs, params)
-                let fetched = await response.json()
+                const fetched = await response.json()
                 fetchedItems = fetched.items
-                for (let i of fetchedItems) {
+                for (const i of fetchedItems) {
                     i.id = compactId(i.id, configs.useInt64)
                     if (
                         i.id === configs.lastId ||
@@ -232,7 +245,7 @@ export const gReaderServiceHooks: ServiceHooks = {
         if (items.length > 0) {
             configs.lastId = items[0].id
             const fidMap = new Map<string, RSSSource>()
-            for (let source of Object.values(state.sources)) {
+            for (const source of Object.values(state.sources)) {
                 if (source.serviceRef) {
                     fidMap.set(source.serviceRef, source)
                 }
@@ -240,22 +253,21 @@ export const gReaderServiceHooks: ServiceHooks = {
             const parsedItems = new Array<RSSItem>()
             items.map(i => {
                 const source = fidMap.get(i.origin.streamId)
-                if (source === undefined) return
+                if (source === undefined) {
+                    return
+                }
                 const dom = domParser.parseFromString(
                     i.summary.content,
-                    "text/html"
+                    "text/html",
                 )
                 if (
                     configs.type == SyncService.Inoreader &&
-                    configs.removeInoreaderAd !== false
+                    configs.removeInoreaderAd !== false &&
+                    dom.documentElement.textContent
+                        .trim()
+                        .startsWith("Ads from Inoreader")
                 ) {
-                    if (
-                        dom.documentElement.textContent
-                            .trim()
-                            .startsWith("Ads from Inoreader")
-                    ) {
-                        dom.body.firstChild.remove()
-                    }
+                    dom.body.firstChild.remove()
                 }
                 const item = {
                     source: source.sid,
@@ -275,47 +287,52 @@ export const gReaderServiceHooks: ServiceHooks = {
                 const baseEl = dom.createElement("base")
                 baseEl.setAttribute(
                     "href",
-                    item.link.split("/").slice(0, 3).join("/")
+                    item.link.split("/").slice(0, 3).join("/"),
                 )
                 dom.head.append(baseEl)
-                let img = dom.querySelector("img")
-                if (img && img.src) item.thumb = img.src
-                if (configs.type == SyncService.Inoreader)
+                const img = dom.querySelector("img")
+                if (img && img.src) {
+                    item.thumb = img.src
+                }
+                if (configs.type == SyncService.Inoreader) {
                     item.title = htmlDecode(item.title)
-                for (let c of i.categories) {
-                    if (!item.hasRead && c.endsWith("/state/com.google/read"))
+                }
+                for (const c of i.categories) {
+                    if (!item.hasRead && c.endsWith("/state/com.google/read")) {
                         item.hasRead = true
-                    else if (
+                    } else if (
                         !item.starred &&
                         c.endsWith("/state/com.google/starred")
-                    )
+                    ) {
                         item.starred = true
+                    }
                 }
                 // Apply rules and sync back to the service
                 if (source.rules) {
-                    const hasRead = item.hasRead
-                    const starred = item.starred
+                    const { hasRead, starred } = item
                     SourceRule.applyAll(source.rules, item)
-                    if (item.hasRead !== hasRead)
+                    if (item.hasRead !== hasRead) {
                         editTag(
                             configs,
                             item.serviceRef,
                             READ_TAG,
-                            item.hasRead
+                            item.hasRead,
                         )
-                    if (item.starred !== starred)
+                    }
+                    if (item.starred !== starred) {
                         editTag(
                             configs,
                             item.serviceRef,
                             STAR_TAG,
-                            item.starred
+                            item.starred,
                         )
+                    }
                 }
                 parsedItems.push(item)
             })
             if (parsedItems.length > 0) {
                 configs.lastFetched = Math.round(
-                    parsedItems[0].fetchedDate.getTime() / 1000
+                    parsedItems[0].fetchedDate.getTime() / 1000,
                 )
             }
             return [parsedItems, configs]
@@ -335,7 +352,7 @@ export const gReaderServiceHooks: ServiceHooks = {
             ]
             if (date) {
                 predicates.push(
-                    before ? db.items.date.lte(date) : db.items.date.gte(date)
+                    before ? db.items.date.lte(date) : db.items.date.gte(date),
                 )
             }
             const query = lf.op.and.apply(null, predicates)
@@ -350,7 +367,7 @@ export const gReaderServiceHooks: ServiceHooks = {
             }
         } else {
             const sources = sids.map(sid => state.sources[sid])
-            for (let source of sources) {
+            for (const source of sources) {
                 if (source.serviceRef) {
                     const body = new URLSearchParams()
                     body.set("s", source.serviceRef)
@@ -358,7 +375,7 @@ export const gReaderServiceHooks: ServiceHooks = {
                         configs,
                         "/reader/api/0/mark-all-as-read",
                         "POST",
-                        body
+                        body,
                     )
                 }
             }
@@ -369,7 +386,7 @@ export const gReaderServiceHooks: ServiceHooks = {
         await editTag(
             getState().service as GReaderConfigs,
             item.serviceRef,
-            READ_TAG
+            READ_TAG,
         )
     },
 
@@ -378,7 +395,7 @@ export const gReaderServiceHooks: ServiceHooks = {
             getState().service as GReaderConfigs,
             item.serviceRef,
             READ_TAG,
-            false
+            false,
         )
     },
 
@@ -386,7 +403,7 @@ export const gReaderServiceHooks: ServiceHooks = {
         await editTag(
             getState().service as GReaderConfigs,
             item.serviceRef,
-            STAR_TAG
+            STAR_TAG,
         )
     },
 
@@ -395,7 +412,7 @@ export const gReaderServiceHooks: ServiceHooks = {
             getState().service as GReaderConfigs,
             item.serviceRef,
             STAR_TAG,
-            false
+            false,
         )
     },
 }

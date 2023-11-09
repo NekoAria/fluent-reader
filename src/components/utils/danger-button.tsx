@@ -17,7 +17,9 @@ class DangerButton extends PrimaryButton {
     onClick = (event: React.MouseEvent<HTMLButtonElement>) => {
         if (!this.props.disabled) {
             if (this.state.confirming) {
-                if (this.props.onClick) this.props.onClick(event)
+                if (this.props.onClick) {
+                    this.props.onClick(event)
+                }
                 clearTimeout(this.timerID)
                 this.clear()
             } else {
@@ -30,7 +32,9 @@ class DangerButton extends PrimaryButton {
     }
 
     componentWillUnmount() {
-        if (this.timerID) clearTimeout(this.timerID)
+        if (this.timerID) {
+            clearTimeout(this.timerID)
+        }
     }
 
     render = () => (
@@ -44,7 +48,8 @@ class DangerButton extends PrimaryButton {
                           action: this.props.text.toLowerCase(),
                       })
                     : this.props.text
-            }>
+            }
+        >
             {this.props.children}
         </PrimaryButton>
     )

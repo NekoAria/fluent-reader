@@ -48,14 +48,17 @@ export class FeedFilter {
     }
 
     static toPredicates(filter: FeedFilter) {
-        let type = filter.type
+        const { type } = filter
         const predicates = new Array<lf.Predicate>()
-        if (!(type & FilterType.ShowRead))
+        if (!(type & FilterType.ShowRead)) {
             predicates.push(db.items.hasRead.eq(false))
-        if (!(type & FilterType.ShowNotStarred))
+        }
+        if (!(type & FilterType.ShowNotStarred)) {
             predicates.push(db.items.starred.eq(true))
-        if (!(type & FilterType.ShowHidden))
+        }
+        if (!(type & FilterType.ShowHidden)) {
             predicates.push(db.items.hidden.eq(false))
+        }
         if (filter.search !== "") {
             const flags = type & FilterType.CaseInsensitive ? "i" : ""
             const regex = RegExp(filter.search, flags)
@@ -63,8 +66,8 @@ export class FeedFilter {
                 predicates.push(
                     lf.op.or(
                         db.items.title.match(regex),
-                        db.items.snippet.match(regex)
-                    )
+                        db.items.snippet.match(regex),
+                    ),
                 )
             } else {
                 predicates.push(db.items.title.match(regex))
@@ -74,11 +77,17 @@ export class FeedFilter {
     }
 
     static testItem(filter: FeedFilter, item: RSSItem) {
-        let type = filter.type
+        const { type } = filter
         let flag = true
-        if (!(type & FilterType.ShowRead)) flag = flag && !item.hasRead
-        if (!(type & FilterType.ShowNotStarred)) flag = flag && item.starred
-        if (!(type & FilterType.ShowHidden)) flag = flag && !item.hidden
+        if (!(type & FilterType.ShowRead)) {
+            flag = flag && !item.hasRead
+        }
+        if (!(type & FilterType.ShowNotStarred)) {
+            flag = flag && item.starred
+        }
+        if (!(type & FilterType.ShowHidden)) {
+            flag = flag && !item.hidden
+        }
         if (filter.search !== "") {
             const flags = type & FilterType.CaseInsensitive ? "i" : ""
             const regex = RegExp(filter.search, flags)
@@ -177,11 +186,11 @@ export type FeedActionTypes =
 export function dismissItems(): AppThunk {
     return (dispatch, getState) => {
         const state = getState()
-        let fid = state.page.feedId
-        let filter = state.feeds[fid].filter
-        let iids = new Set<number>()
-        for (let iid of state.feeds[fid].iids) {
-            let item = state.items[iid]
+        const fid = state.page.feedId
+        const { filter } = state.feeds[fid]
+        const iids = new Set<number>()
+        for (const iid of state.feeds[fid].iids) {
+            const item = state.items[iid]
             if (!FeedFilter.testItem(filter, item)) {
                 iids.add(iid)
             }
@@ -209,7 +218,7 @@ export function initFeedsSuccess(): FeedActionTypes {
 
 export function initFeedSuccess(
     feed: RSSFeed,
-    items: RSSItem[]
+    items: RSSItem[],
 ): FeedActionTypes {
     return {
         type: INIT_FEED,
@@ -230,10 +239,10 @@ export function initFeedFailure(err): FeedActionTypes {
 export function initFeeds(force = false): AppThunk<Promise<void>> {
     return (dispatch, getState) => {
         dispatch(initFeedsRequest())
-        let promises = new Array<Promise<void>>()
-        for (let feed of Object.values(getState().feeds)) {
+        const promises = new Array<Promise<void>>()
+        for (const feed of Object.values(getState().feeds)) {
             if (!feed.loaded || force) {
-                let p = RSSFeed.loadFeed(feed)
+                const p = RSSFeed.loadFeed(feed)
                     .then(items => {
                         dispatch(initFeedSuccess(feed, items))
                     })
@@ -260,7 +269,7 @@ export function loadMoreRequest(feed: RSSFeed): FeedActionTypes {
 
 export function loadMoreSuccess(
     feed: RSSFeed,
-    items: RSSItem[]
+    items: RSSItem[],
 ): FeedActionTypes {
     return {
         type: LOAD_MORE,
@@ -285,7 +294,7 @@ export function loadMore(feed: RSSFeed): AppThunk<Promise<void>> {
             dispatch(loadMoreRequest(feed))
             const state = getState()
             const skipNum = feed.iids.filter(i =>
-                FeedFilter.testItem(feed.filter, state.items[i])
+                FeedFilter.testItem(feed.filter, state.items[i]),
             ).length
             return RSSFeed.loadFeed(feed, skipNum)
                 .then(items => {
@@ -308,7 +317,7 @@ export function feedReducer(
         | SourceActionTypes
         | ItemActionTypes
         | FeedActionTypes
-        | PageActionTypes
+        | PageActionTypes,
 ): FeedState {
     switch (action.type) {
         case INIT_SOURCES:
@@ -320,7 +329,7 @@ export function feedReducer(
                             ALL,
                             Object.values(action.sources)
                                 .filter(s => !s.hidden)
-                                .map(s => s.sid)
+                                .map(s => s.sid),
                         ),
                     }
                 default:
@@ -335,7 +344,7 @@ export function feedReducer(
                         [ALL]: new RSSFeed(
                             ALL,
                             [...state[ALL].sids, action.source.sid],
-                            state[ALL].filter
+                            state[ALL].filter,
                         ),
                     }
                 default:
@@ -343,19 +352,19 @@ export function feedReducer(
             }
         case DELETE_SOURCE:
         case HIDE_SOURCE: {
-            let nextState = {}
-            for (let [id, feed] of Object.entries(state)) {
+            const nextState = {}
+            for (const [id, feed] of Object.entries(state)) {
                 nextState[id] = new RSSFeed(
                     id,
                     feed.sids.filter(sid => sid != action.source.sid),
-                    feed.filter
+                    feed.filter,
                 )
             }
             return nextState
         }
         case APPLY_FILTER: {
-            let nextState = {}
-            for (let [id, feed] of Object.entries(state)) {
+            const nextState = {}
+            for (const [id, feed] of Object.entries(state)) {
                 nextState[id] = {
                     ...feed,
                     filter: action.filter,
@@ -366,23 +375,23 @@ export function feedReducer(
         case FETCH_ITEMS:
             switch (action.status) {
                 case ActionStatus.Success: {
-                    let nextState = { ...state }
-                    for (let feed of Object.values(state)) {
+                    const nextState = { ...state }
+                    for (const feed of Object.values(state)) {
                         if (feed.loaded) {
-                            let items = action.items.filter(
+                            const items = action.items.filter(
                                 i =>
                                     feed.sids.includes(i.source) &&
-                                    FeedFilter.testItem(feed.filter, i)
+                                    FeedFilter.testItem(feed.filter, i),
                             )
                             if (items.length > 0) {
-                                let oldItems = feed.iids.map(
-                                    id => action.itemState[id]
+                                const oldItems = feed.iids.map(
+                                    id => action.itemState[id],
                                 )
-                                let nextItems = mergeSortedArrays(
+                                const nextItems = mergeSortedArrays(
                                     oldItems,
                                     items,
                                     (a, b) =>
-                                        b.date.getTime() - a.date.getTime()
+                                        b.date.getTime() - a.date.getTime(),
                                 )
                                 nextState[feed._id] = {
                                     ...feed,
@@ -397,8 +406,8 @@ export function feedReducer(
                     return state
             }
         case DISMISS_ITEMS:
-            let nextState = { ...state }
-            let feed = state[action.fid]
+            const nextState = { ...state }
+            const feed = state[action.fid]
             nextState[action.fid] = {
                 ...feed,
                 iids: feed.iids.filter(iid => !action.iids.has(iid)),
@@ -454,14 +463,14 @@ export function feedReducer(
                     return state
             }
         case TOGGLE_HIDDEN: {
-            let nextItem = applyItemReduction(action.item, action.type)
-            let filteredFeeds = Object.values(state).filter(
+            const nextItem = applyItemReduction(action.item, action.type)
+            const filteredFeeds = Object.values(state).filter(
                 feed =>
-                    feed.loaded && !FeedFilter.testItem(feed.filter, nextItem)
+                    feed.loaded && !FeedFilter.testItem(feed.filter, nextItem),
             )
             if (filteredFeeds.length > 0) {
-                let nextState = { ...state }
-                for (let feed of filteredFeeds) {
+                const nextState = { ...state }
+                for (const feed of filteredFeeds) {
                     nextState[feed._id] = {
                         ...feed,
                         iids: feed.iids.filter(id => id != nextItem._id),
@@ -480,7 +489,7 @@ export function feedReducer(
                         [SOURCE]: new RSSFeed(
                             SOURCE,
                             action.sids,
-                            action.filter
+                            action.filter,
                         ),
                     }
                 case PageType.AllArticles:

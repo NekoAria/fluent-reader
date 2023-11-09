@@ -31,7 +31,7 @@ const mapStateToProps = createSelector(
         groups: groups.map((g, i) => ({ ...g, index: i })),
         searchOn: searchOn,
         itemOn: itemOn,
-    })
+    }),
 )
 
 const mapDispatchToProps = dispatch => ({
@@ -53,11 +53,13 @@ const mapDispatchToProps = dispatch => ({
     updateGroupExpansion: (
         event: React.MouseEvent<HTMLElement>,
         key: string,
-        selected: string
+        selected: string,
     ) => {
         if ((event.target as HTMLElement).tagName === "I" || key === selected) {
-            let [type, index] = key.split("-")
-            if (type === "g") dispatch(toggleGroupExpansion(parseInt(index)))
+            const [type, index] = key.split("-")
+            if (type === "g") {
+                dispatch(toggleGroupExpansion(parseInt(index)))
+            }
         }
     },
     toggleSearch: () => dispatch(toggleSearch()),

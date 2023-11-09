@@ -37,7 +37,7 @@ type ArticleProps = {
     dismissContextMenu: () => void
     updateSourceTextDirection: (
         source: RSSSource,
-        direction: SourceTextDirection
+        direction: SourceTextDirection,
     ) => void
 }
 
@@ -70,8 +70,9 @@ class Article extends React.Component<ArticleProps, ArticleState> {
         window.utils.addWebviewContextListener(this.contextMenuHandler)
         window.utils.addWebviewKeydownListener(this.keyDownHandler)
         window.utils.addWebviewErrorListener(this.webviewError)
-        if (props.source.openTarget === SourceOpenTarget.FullContent)
+        if (props.source.openTarget === SourceOpenTarget.FullContent) {
             this.loadFull()
+        }
     }
 
     setFontSize = (size: number) => {
@@ -149,7 +150,7 @@ class Article extends React.Component<ArticleProps, ArticleState> {
                 onClick: e => {
                     window.utils.openExternal(
                         this.props.item.link,
-                        platformCtrl(e)
+                        platformCtrl(e),
                     )
                 },
             },
@@ -204,8 +205,11 @@ class Article extends React.Component<ArticleProps, ArticleState> {
 
     contextMenuHandler = (pos: [number, number], text: string, url: string) => {
         if (pos) {
-            if (text || url) this.props.textMenu(pos, text, url)
-            else this.props.imageMenu(pos)
+            if (text || url) {
+                this.props.textMenu(pos, text, url)
+            } else {
+                this.props.imageMenu(pos)
+            }
         } else {
             this.props.dismissContextMenu()
         }
@@ -231,7 +235,9 @@ class Article extends React.Component<ArticleProps, ArticleState> {
                     break
                 case "H":
                 case "h":
-                    if (!input.meta) this.props.toggleHidden(this.props.item)
+                    if (!input.meta) {
+                        this.props.toggleHidden(this.props.item)
+                    }
                     break
                 default:
                     const keyboardEvent = new KeyboardEvent("keydown", {
@@ -267,18 +273,22 @@ class Article extends React.Component<ArticleProps, ArticleState> {
     }
 
     componentDidMount = () => {
-        let webview = document.getElementById("article") as Electron.WebviewTag
+        const webview = document.getElementById(
+            "article",
+        ) as Electron.WebviewTag
         if (webview != this.webview) {
             this.webview = webview
             if (webview) {
                 webview.focus()
                 this.setState({ loaded: false, error: false })
                 webview.addEventListener("did-stop-loading", this.webviewLoaded)
-                let card = document.querySelector(
-                    `#refocus div[data-iid="${this.props.item._id}"]`
+                const card = document.querySelector(
+                    `#refocus div[data-iid="${this.props.item._id}"]`,
                 ) as HTMLElement
-                // @ts-ignore
-                if (card) card.scrollIntoViewIfNeeded()
+                if (card) {
+                    // @ts-ignore
+                    card.scrollIntoViewIfNeeded()
+                }
             }
         }
     }
@@ -291,17 +301,20 @@ class Article extends React.Component<ArticleProps, ArticleState> {
                     this.props.source.openTarget ===
                     SourceOpenTarget.FullContent,
             })
-            if (this.props.source.openTarget === SourceOpenTarget.FullContent)
+            if (this.props.source.openTarget === SourceOpenTarget.FullContent) {
                 this.loadFull()
+            }
         }
         this.componentDidMount()
     }
 
     componentWillUnmount = () => {
-        let refocus = document.querySelector(
-            `#refocus div[data-iid="${this.props.item._id}"]`
+        const refocus = document.querySelector(
+            `#refocus div[data-iid="${this.props.item._id}"]`,
         ) as HTMLElement
-        if (refocus) refocus.focus()
+        if (refocus) {
+            refocus.focus()
+        }
     }
 
     toggleWebpage = () => {
@@ -328,10 +341,12 @@ class Article extends React.Component<ArticleProps, ArticleState> {
     }
     loadFull = async () => {
         this.setState({ fullContent: "", loaded: false, error: false })
-        const link = this.props.item.link
+        const { link } = this.props.item
         try {
             const result = await fetch(link)
-            if (!result || !result.ok) throw new Error()
+            if (!result || !result.ok) {
+                throw new Error()
+            }
             const html = await decodeFetchResponse(result, true)
             if (link === this.props.item.link) {
                 this.setState({ fullContent: html })
@@ -351,7 +366,7 @@ class Article extends React.Component<ArticleProps, ArticleState> {
         const a = encodeURIComponent(
             this.state.loadFull
                 ? this.state.fullContent
-                : this.props.item.content
+                : this.props.item.content,
         )
         const h = encodeURIComponent(
             renderToString(
@@ -360,15 +375,15 @@ class Article extends React.Component<ArticleProps, ArticleState> {
                     <p className="date">
                         {this.props.item.date.toLocaleString(
                             this.props.locale,
-                            { hour12: !this.props.locale.startsWith("zh") }
+                            { hour12: !this.props.locale.startsWith("zh") },
                         )}
                     </p>
                     <article></article>
-                </>
-            )
+                </>,
+            ),
         )
         return `article/article.html?a=${a}&h=${h}&f=${encodeURIComponent(
-            this.state.fontFamily
+            this.state.fontFamily,
         )}&s=${this.state.fontSize}&d=${this.props.source.textDir}&u=${
             this.props.item.link
         }&m=${this.state.loadFull ? 1 : 0}`
@@ -382,7 +397,8 @@ class Article extends React.Component<ArticleProps, ArticleState> {
                     className="actions"
                     grow
                     horizontal
-                    tokens={{ childrenGap: 12 }}>
+                    tokens={{ childrenGap: 12 }}
+                >
                     <Stack.Item grow>
                         <span className="source-name">
                             {this.state.loaded ? (
@@ -490,12 +506,14 @@ class Article extends React.Component<ArticleProps, ArticleState> {
                     className="error-prompt"
                     verticalAlign="center"
                     horizontalAlign="center"
-                    tokens={{ childrenGap: 12 }}>
+                    tokens={{ childrenGap: 12 }}
+                >
                     <Icon iconName="HeartBroken" style={{ fontSize: 32 }} />
                     <Stack
                         horizontal
                         horizontalAlign="center"
-                        tokens={{ childrenGap: 7 }}>
+                        tokens={{ childrenGap: 7 }}
+                    >
                         <small>{intl.get("article.error")}</small>
                         <small>
                             <Link onClick={this.webviewReload}>

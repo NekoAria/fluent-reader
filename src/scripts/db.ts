@@ -76,14 +76,18 @@ async function migrateNeDB() {
             filename: "sources",
             autoload: true,
             onload: err => {
-                if (err) window.console.log(err)
+                if (err) {
+                    window.console.log(err)
+                }
             },
         })
         const idb = new Datastore<RSSItem>({
             filename: "items",
             autoload: true,
             onload: err => {
-                if (err) window.console.log(err)
+                if (err) {
+                    window.console.log(err)
+                }
             },
         })
         const sourceDocs = await new Promise<RSSSource[]>(resolve => {
@@ -97,21 +101,31 @@ async function migrateNeDB() {
             })
         })
         const sRows = sourceDocs.map(doc => {
-            if (doc.serviceRef !== undefined)
+            if (doc.serviceRef !== undefined) {
                 doc.serviceRef = String(doc.serviceRef)
+            }
             // @ts-ignore
             delete doc._id
-            if (!doc.fetchFrequency) doc.fetchFrequency = 0
+            if (!doc.fetchFrequency) {
+                doc.fetchFrequency = 0
+            }
             doc.textDir = 0
             doc.hidden = false
             return sources.createRow(doc)
         })
         const iRows = itemDocs.map(doc => {
-            if (doc.serviceRef !== undefined)
+            if (doc.serviceRef !== undefined) {
                 doc.serviceRef = String(doc.serviceRef)
-            if (!doc.title) doc.title = intl.get("article.untitled")
-            if (!doc.content) doc.content = ""
-            if (!doc.snippet) doc.snippet = ""
+            }
+            if (!doc.title) {
+                doc.title = intl.get("article.untitled")
+            }
+            if (!doc.content) {
+                doc.content = ""
+            }
+            if (!doc.snippet) {
+                doc.snippet = ""
+            }
             delete doc._id
             doc.starred = Boolean(doc.starred)
             doc.hidden = Boolean(doc.hidden)
@@ -132,7 +146,7 @@ async function migrateNeDB() {
     } catch (err) {
         window.utils.showErrorBox(
             "An error has occured during update. Please report this error on GitHub.",
-            String(err)
+            String(err),
         )
         window.utils.closeWindow()
     }

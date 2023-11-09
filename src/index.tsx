@@ -17,7 +17,7 @@ initializeIcons("icons/")
 
 const store = createStore(
     rootReducer,
-    applyMiddleware<AppDispatch, RootState>(thunkMiddleware)
+    applyMiddleware<AppDispatch, RootState>(thunkMiddleware),
 )
 
 store.dispatch(initApp())
@@ -35,5 +35,5 @@ ReactDOM.render(
     <Provider store={store}>
         <Root />
     </Provider>,
-    document.getElementById("app")
+    document.getElementById("app"),
 )

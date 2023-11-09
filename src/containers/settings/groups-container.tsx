@@ -26,7 +26,7 @@ const mapStateToProps = createSelector(
         groups: groups.map((g, i) => ({ ...g, index: i })),
         serviceOn: serviceOn,
         key: groups.length,
-    })
+    }),
 )
 
 const mapDispatchToProps = (dispatch: AppDispatch) => ({
@@ -45,6 +45,6 @@ const mapDispatchToProps = (dispatch: AppDispatch) => ({
 
 const GroupsTabContainer = connect(
     mapStateToProps,
-    mapDispatchToProps
+    mapDispatchToProps,
 )(GroupsTab)
 export default GroupsTabContainer

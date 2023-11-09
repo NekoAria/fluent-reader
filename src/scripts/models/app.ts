@@ -64,7 +64,7 @@ export class AppLog {
         type: AppLogType,
         title: string,
         details: string = null,
-        iid: number = null
+        iid: number = null,
     ) {
         this.type = type
         this.title = title
@@ -219,7 +219,7 @@ export function closeContextMenu(): AppThunk {
 export function openItemMenu(
     item: RSSItem,
     feedId: string,
-    event: React.MouseEvent
+    event: React.MouseEvent,
 ): ContextMenuActionTypes {
     return {
         type: OPEN_ITEM_MENU,
@@ -232,7 +232,7 @@ export function openItemMenu(
 export function openTextMenu(
     position: [number, number],
     text: string,
-    url: string = null
+    url: string = null,
 ): ContextMenuActionTypes {
     return {
         type: OPEN_TEXT_MENU,
@@ -247,7 +247,7 @@ export const openViewMenu = (): ContextMenuActionTypes => ({
 
 export function openGroupMenu(
     sids: number[],
-    event: React.MouseEvent
+    event: React.MouseEvent,
 ): ContextMenuActionTypes {
     return {
         type: OPEN_GROUP_MENU,
@@ -257,7 +257,7 @@ export function openGroupMenu(
 }
 
 export function openImageMenu(
-    position: [number, number]
+    position: [number, number],
 ): ContextMenuActionTypes {
     return {
         type: OPEN_IMAGE_MENU,
@@ -304,8 +304,10 @@ export function exitSettings(): AppThunk<Promise<void>> {
 function freeMemory(): AppThunk {
     return (dispatch, getState) => {
         const iids = new Set<number>()
-        for (let feed of Object.values(getState().feeds)) {
-            if (feed.loaded) feed.iids.forEach(iids.add, iids)
+        for (const feed of Object.values(getState().feeds)) {
+            if (feed.loaded) {
+                feed.iids.forEach(iids.add, iids)
+            }
         }
         dispatch({
             type: FREE_MEMORY,
@@ -319,12 +321,16 @@ export function setupAutoFetch(): AppThunk {
     return (dispatch, getState) => {
         clearTimeout(fetchTimeout)
         const setupTimeout = (interval?: number) => {
-            if (!interval) interval = window.settings.getFetchInterval()
+            if (!interval) {
+                interval = window.settings.getFetchInterval()
+            }
             if (interval) {
                 fetchTimeout = setTimeout(() => {
-                    let state = getState()
+                    const state = getState()
                     if (!state.app.settings.display) {
-                        if (!state.app.fetchingItems) dispatch(fetchItems(true))
+                        if (!state.app.fetchingItems) {
+                            dispatch(fetchItems(true))
+                        }
                     } else {
                         setupTimeout(1)
                     }
@@ -340,7 +346,9 @@ export function pushNotification(item: RSSItem): AppThunk {
         const sourceName = getState().sources[item.source].name
         if (!window.utils.isFocused()) {
             const options = { body: sourceName } as any
-            if (item.thumb) options.icon = item.thumb
+            if (item.thumb) {
+                options.icon = item.thumb
+            }
             const notification = new Notification(item.title, options)
             notification.onclick = () => {
                 const state = getState()
@@ -380,7 +388,7 @@ export const initIntlDone = (locale: string): InitIntlAction => {
 
 export function initIntl(): AppThunk<Promise<void>> {
     return dispatch => {
-        let locale = getCurrentLocale()
+        const locale = getCurrentLocale()
         return intl
             .init({
                 currentLocale: locale,
@@ -398,7 +406,9 @@ export function initApp(): AppThunk {
         document.body.classList.add(window.utils.platform)
         dispatch(initIntl())
             .then(async () => {
-                if (window.utils.platform === "darwin") initTouchBarWithTexts()
+                if (window.utils.platform === "darwin") {
+                    initTouchBarWithTexts()
+                }
                 await dispatch(initSources())
             })
             .then(() => dispatch(initFeeds()))
@@ -425,7 +435,7 @@ export function appReducer(
         | FeedActionTypes
         | PageActionTypes
         | SourceGroupActionTypes
-        | ServiceActionTypes
+        | ServiceActionTypes,
 ): AppState {
     switch (action.type) {
         case INIT_INTL:
@@ -508,7 +518,7 @@ export function appReducer(
                                 new AppLog(
                                     AppLogType.Failure,
                                     intl.get("log.syncFailure"),
-                                    String(action.err)
+                                    String(action.err),
                                 ),
                             ],
                         },
@@ -541,7 +551,7 @@ export function appReducer(
                                     intl.get("log.fetchFailure", {
                                         name: action.errSource.name,
                                     }),
-                                    String(action.err)
+                                    String(action.err),
                                 ),
                             ],
                         },
@@ -562,7 +572,7 @@ export function appReducer(
                                               AppLogType.Info,
                                               intl.get("log.fetchSuccess", {
                                                   count: action.items.length,
-                                              })
+                                              }),
                                           ),
                                       ],
                                   },
@@ -702,7 +712,7 @@ export function appReducer(
                             AppLogType.Article,
                             action.title,
                             action.source,
-                            action.iid
+                            action.iid,
                         ),
                     ],
                 },

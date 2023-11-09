@@ -49,7 +49,7 @@ function setProxy(address = null) {
         store.set(PAC_STORE_KEY, address)
     }
     if (getProxyStatus()) {
-        let rules = { pacScript: address }
+        const rules = { pacScript: address }
         session.defaultSession.setProxy(rules)
         session.fromPartition("sandbox").setProxy(rules)
     }
@@ -90,7 +90,7 @@ export function setThemeListener(manager: WindowManager) {
     nativeTheme.removeAllListeners()
     nativeTheme.on("updated", () => {
         if (manager.hasWindow()) {
-            let contents = manager.mainWindow.webContents
+            const contents = manager.mainWindow.webContents
             if (!contents.isDestroyed()) {
                 contents.send("theme-updated", nativeTheme.shouldUseDarkColors)
             }
@@ -109,8 +109,8 @@ ipcMain.on("get-locale-settings", event => {
     event.returnValue = getLocaleSettings()
 })
 ipcMain.on("get-locale", event => {
-    let setting = getLocaleSettings()
-    let locale = setting === "default" ? app.getLocale() : setting
+    const setting = getLocaleSettings()
+    const locale = setting === "default" ? app.getLocale() : setting
     event.returnValue = locale
 })
 
@@ -131,8 +131,8 @@ ipcMain.handle("set-font", (_, font: string) => {
 })
 
 ipcMain.on("get-all-settings", event => {
-    let output = {}
-    for (let [key, value] of store) {
+    const output = {}
+    for (const [key, value] of store) {
         output[key] = value
     }
     event.returnValue = output
@@ -178,7 +178,7 @@ ipcMain.on("get-view-configs", (event, view: ViewType) => {
         case ViewType.List:
             event.returnValue = store.get(
                 LIST_CONFIGS_STORE_KEY,
-                ViewConfigs.ShowCover
+                ViewConfigs.ShowCover,
             )
             break
         default:
@@ -194,7 +194,7 @@ ipcMain.handle(
                 store.set(LIST_CONFIGS_STORE_KEY, configs)
                 break
         }
-    }
+    },
 )
 
 const NEDB_STATUS_STORE_KEY = "useNeDB"

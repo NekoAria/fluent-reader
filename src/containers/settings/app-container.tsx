@@ -21,7 +21,7 @@ const mapDispatchToProps = (dispatch: AppDispatch) => ({
     },
     deleteArticles: async (days: number) => {
         dispatch(saveSettings())
-        let date = new Date()
+        const date = new Date()
         date.setTime(date.getTime() - days * 86400000)
         await db.itemsDB
             .delete()
@@ -33,8 +33,10 @@ const mapDispatchToProps = (dispatch: AppDispatch) => ({
     },
     importAll: async () => {
         dispatch(saveSettings())
-        let cancelled = await importAll()
-        if (cancelled) dispatch(saveSettings())
+        const cancelled = await importAll()
+        if (cancelled) {
+            dispatch(saveSettings())
+        }
     },
 })
 

@@ -59,9 +59,11 @@ export class RSSSource {
     }
 
     static async fetchMetaData(source: RSSSource) {
-        let feed = await parseRSS(source.url)
+        const feed = await parseRSS(source.url)
         if (!source.name) {
-            if (feed.title) source.name = feed.title.trim()
+            if (feed.title) {
+                source.name = feed.title.trim()
+            }
             source.name = source.name || intl.get("sources.untitled")
         }
         return feed
@@ -69,9 +71,9 @@ export class RSSSource {
 
     private static async checkItem(
         source: RSSSource,
-        item: MyParserItem
+        item: MyParserItem,
     ): Promise<RSSItem> {
-        let i = new RSSItem(item, source)
+        const i = new RSSItem(item, source)
         const items = (await db.itemsDB
             .select()
             .from(db.items)
@@ -79,14 +81,16 @@ export class RSSSource {
                 lf.op.and(
                     db.items.source.eq(i.source),
                     db.items.title.eq(i.title),
-                    db.items.date.eq(i.date)
-                )
+                    db.items.date.eq(i.date),
+                ),
             )
             .limit(1)
             .exec()) as RSSItem[]
         if (items.length === 0) {
             RSSItem.parseContent(i, item)
-            if (source.rules) SourceRule.applyAll(source.rules, i)
+            if (source.rules) {
+                SourceRule.applyAll(source.rules, i)
+            }
             return i
         } else {
             return null
@@ -95,11 +99,11 @@ export class RSSSource {
 
     static checkItems(
         source: RSSSource,
-        items: MyParserItem[]
+        items: MyParserItem[],
     ): Promise<RSSItem[]> {
         return new Promise<RSSItem[]>((resolve, reject) => {
-            let p = new Array<Promise<RSSItem>>()
-            for (let item of items) {
+            const p = new Array<Promise<RSSItem>>()
+            for (const item of items) {
                 p.push(this.checkItem(source, item))
             }
             Promise.all(p)
@@ -113,7 +117,7 @@ export class RSSSource {
     }
 
     static async fetchItems(source: RSSSource) {
-        let feed = await parseRSS(source.url)
+        const feed = await parseRSS(source.url)
         return await this.checkItems(source, feed.items)
     }
 }
@@ -204,7 +208,7 @@ async function unreadCount(sources: SourceState): Promise<SourceState> {
         .where(db.items.hasRead.eq(false))
         .groupBy(db.items.source)
         .exec()
-    for (let row of rows) {
+    for (const row of rows) {
         sources[row["source"]].unreadCount = row["COUNT(_id)"]
     }
     return sources
@@ -213,7 +217,7 @@ async function unreadCount(sources: SourceState): Promise<SourceState> {
 export function updateUnreadCounts(): AppThunk<Promise<void>> {
     return async (dispatch, getState) => {
         const sources: SourceState = {}
-        for (let source of Object.values(getState().sources)) {
+        for (const source of Object.values(getState().sources)) {
             sources[source.sid] = {
                 ...source,
                 unreadCount: 0,
@@ -235,7 +239,7 @@ export function initSources(): AppThunk<Promise<void>> {
             .from(db.sources)
             .exec()) as RSSSource[]
         const state: SourceState = {}
-        for (let source of sources) {
+        for (const source of sources) {
             source.unreadCount = 0
             state[source.sid] = source
         }
@@ -255,7 +259,7 @@ export function addSourceRequest(batch: boolean): SourceActionTypes {
 
 export function addSourceSuccess(
     source: RSSSource,
-    batch: boolean
+    batch: boolean,
 ): SourceActionTypes {
     return {
         type: ADD_SOURCE,
@@ -279,7 +283,7 @@ export function insertSource(source: RSSSource): AppThunk<Promise<RSSSource>> {
     return (_, getState) => {
         return new Promise((resolve, reject) => {
             insertPromises = insertPromises.then(async () => {
-                let sids = Object.values(getState().sources).map(s => s.sid)
+                const sids = Object.values(getState().sources).map(s => s.sid)
                 source.sid = Math.max(...sids, -1) + 1
                 const row = db.sources.createRow(source)
                 try {
@@ -290,8 +294,11 @@ export function insertSource(source: RSSSource): AppThunk<Promise<RSSSource>> {
                         .exec()) as RSSSource[]
                     resolve(inserted[0])
                 } catch (err) {
-                    if (err.code === 201) reject(intl.get("sources.exist"))
-                    else reject(err)
+                    if (err.code === 201) {
+                        reject(intl.get("sources.exist"))
+                    } else {
+                        reject(err)
+                    }
                 }
             })
         })
@@ -301,10 +308,10 @@ export function insertSource(source: RSSSource): AppThunk<Promise<RSSSource>> {
 export function addSource(
     url: string,
     name: string = null,
-    batch = false
+    batch = false,
 ): AppThunk<Promise<number>> {
     return async (dispatch, getState) => {
-        const app = getState().app
+        const { app } = getState()
         if (app.sourceInit) {
             dispatch(addSourceRequest(batch))
             const source = new RSSSource(url, name)
@@ -324,7 +331,7 @@ export function addSource(
                     window.utils.showErrorBox(
                         intl.get("sources.errorAdd"),
                         String(e),
-                        intl.get("context.copy")
+                        intl.get("context.copy"),
                     )
                 }
                 throw e
@@ -343,7 +350,7 @@ export function updateSourceDone(source: RSSSource): SourceActionTypes {
 
 export function updateSource(source: RSSSource): AppThunk<Promise<void>> {
     return async dispatch => {
-        let sourceCopy = { ...source }
+        const sourceCopy = { ...source }
         delete sourceCopy.unreadCount
         const row = db.sources.createRow(sourceCopy)
         await db.sourcesDB
@@ -364,10 +371,12 @@ export function deleteSourceDone(source: RSSSource): SourceActionTypes {
 
 export function deleteSource(
     source: RSSSource,
-    batch = false
+    batch = false,
 ): AppThunk<Promise<void>> {
     return async (dispatch, getState) => {
-        if (!batch) dispatch(saveSettings())
+        if (!batch) {
+            dispatch(saveSettings())
+        }
         try {
             await db.itemsDB
                 .delete()
@@ -384,7 +393,9 @@ export function deleteSource(
         } catch (err) {
             console.log(err)
         } finally {
-            if (!batch) dispatch(saveSettings())
+            if (!batch) {
+                dispatch(saveSettings())
+            }
         }
     }
 }
@@ -392,7 +403,7 @@ export function deleteSource(
 export function deleteSources(sources: RSSSource[]): AppThunk<Promise<void>> {
     return async dispatch => {
         dispatch(saveSettings())
-        for (let source of sources) {
+        for (const source of sources) {
             await dispatch(deleteSource(source, true))
         }
         dispatch(saveSettings())
@@ -414,7 +425,7 @@ export function toggleSourceHidden(source: RSSSource): AppThunk<Promise<void>> {
 
 export function updateFavicon(
     sids?: number[],
-    force = false
+    force = false,
 ): AppThunk<Promise<void>> {
     return async (dispatch, getState) => {
         const initSources = getState().sources
@@ -426,8 +437,8 @@ export function updateFavicon(
             sids = sids.filter(sid => sid in initSources)
         }
         const promises = sids.map(async sid => {
-            const url = initSources[sid].url
-            let favicon = (await fetchFavicon(url)) || ""
+            const { url } = initSources[sid]
+            const favicon = (await fetchFavicon(url)) || ""
             const source = getState().sources[sid]
             if (
                 source &&
@@ -444,7 +455,7 @@ export function updateFavicon(
 
 export function sourceReducer(
     state: SourceState = {},
-    action: SourceActionTypes | ItemActionTypes
+    action: SourceActionTypes | ItemActionTypes,
 ): SourceState {
     switch (action.type) {
         case INIT_SOURCES:
@@ -478,20 +489,20 @@ export function sourceReducer(
         case FETCH_ITEMS: {
             switch (action.status) {
                 case ActionStatus.Success: {
-                    let updateMap = new Map<number, number>()
-                    for (let item of action.items) {
+                    const updateMap = new Map<number, number>()
+                    for (const item of action.items) {
                         if (!item.hasRead) {
                             updateMap.set(
                                 item.source,
                                 updateMap.has(item.source)
                                     ? updateMap.get(item.source) + 1
-                                    : 1
+                                    : 1,
                             )
                         }
                     }
-                    let nextState = {} as SourceState
-                    for (let [s, source] of Object.entries(state)) {
-                        let sid = parseInt(s)
+                    const nextState = {} as SourceState
+                    for (const [s, source] of Object.entries(state)) {
+                        const sid = parseInt(s)
                         if (updateMap.has(sid)) {
                             nextState[sid] = {
                                 ...source,
@@ -520,7 +531,7 @@ export function sourceReducer(
                 } as RSSSource,
             }
         case MARK_ALL_READ: {
-            let nextState = { ...state }
+            const nextState = { ...state }
             action.sids.forEach(sid => {
                 nextState[sid] = {
                     ...state[sid],

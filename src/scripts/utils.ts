@@ -83,7 +83,7 @@ export async function parseRSS(url: string) {
     if (result && result.ok) {
         try {
             return await rssParser.parseString(
-                await decodeFetchResponse(result)
+                await decodeFetchResponse(result),
             )
         } catch {
             throw new Error(intl.get("log.parseError"))
@@ -98,26 +98,30 @@ export const domParser = new DOMParser()
 export async function fetchFavicon(url: string) {
     try {
         url = url.split("/").slice(0, 3).join("/")
-        let result = await fetch(url, { credentials: "omit" })
+        const result = await fetch(url, { credentials: "omit" })
         if (result.ok) {
-            let html = await result.text()
-            let dom = domParser.parseFromString(html, "text/html")
-            let links = dom.getElementsByTagName("link")
-            for (let link of links) {
-                let rel = link.getAttribute("rel")
+            const html = await result.text()
+            const dom = domParser.parseFromString(html, "text/html")
+            const links = dom.getElementsByTagName("link")
+            for (const link of links) {
+                const rel = link.getAttribute("rel")
                 if (
                     (rel === "icon" || rel === "shortcut icon") &&
                     link.hasAttribute("href")
                 ) {
-                    let href = link.getAttribute("href")
-                    let parsedUrl = Url.parse(url)
-                    if (href.startsWith("//")) return parsedUrl.protocol + href
-                    else if (href.startsWith("/")) return url + href
-                    else return href
+                    const href = link.getAttribute("href")
+                    const parsedUrl = Url.parse(url)
+                    if (href.startsWith("//")) {
+                        return parsedUrl.protocol + href
+                    } else if (href.startsWith("/")) {
+                        return url + href
+                    } else {
+                        return href
+                    }
                 }
             }
         }
-        url = url + "/favicon.ico"
+        url += "/favicon.ico"
         if (await validateFavicon(url)) {
             return url
         } else {
@@ -139,19 +143,20 @@ export async function validateFavicon(url: string) {
         ) {
             flag = true
         }
-    } finally {
-        return flag
+    } catch (error) {
+        console.error("An error occurred while validating favicon: ", error)
     }
+    return flag
 }
 
 export function htmlDecode(input: string) {
-    var doc = domParser.parseFromString(input, "text/html")
+    const doc = domParser.parseFromString(input, "text/html")
     return doc.documentElement.textContent
 }
 
 export const urlTest = (s: string) =>
     /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,63}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/gi.test(
-        s
+        s,
     )
 
 export const getWindowBreakpoint = () => window.outerWidth >= 1440
@@ -176,19 +181,19 @@ export function webSearch(text: string, engine = SearchEngines.Google) {
     switch (engine) {
         case SearchEngines.Google:
             return window.utils.openExternal(
-                "https://www.google.com/search?q=" + encodeURIComponent(text)
+                "https://www.google.com/search?q=" + encodeURIComponent(text),
             )
         case SearchEngines.Bing:
             return window.utils.openExternal(
-                "https://www.bing.com/search?q=" + encodeURIComponent(text)
+                "https://www.bing.com/search?q=" + encodeURIComponent(text),
             )
         case SearchEngines.Baidu:
             return window.utils.openExternal(
-                "https://www.baidu.com/s?wd=" + encodeURIComponent(text)
+                "https://www.baidu.com/s?wd=" + encodeURIComponent(text),
             )
         case SearchEngines.DuckDuckGo:
             return window.utils.openExternal(
-                "https://duckduckgo.com/?q=" + encodeURIComponent(text)
+                "https://duckduckgo.com/?q=" + encodeURIComponent(text),
             )
     }
 }
@@ -196,9 +201,9 @@ export function webSearch(text: string, engine = SearchEngines.Google) {
 export function mergeSortedArrays<T>(
     a: T[],
     b: T[],
-    cmp: (x: T, y: T) => number
+    cmp: (x: T, y: T) => number,
 ): T[] {
-    let merged = new Array<T>()
+    const merged = new Array<T>()
     let i = 0
     let j = 0
     while (i < a.length && j < b.length) {
@@ -208,23 +213,32 @@ export function mergeSortedArrays<T>(
             merged.push(b[j++])
         }
     }
-    while (i < a.length) merged.push(a[i++])
-    while (j < b.length) merged.push(b[j++])
+    while (i < a.length) {
+        merged.push(a[i++])
+    }
+    while (j < b.length) {
+        merged.push(b[j++])
+    }
     return merged
 }
 
 export function byteToMB(B: number) {
-    let MB = Math.round(B / 1048576)
+    const MB = Math.round(B / 1048576)
     return MB + "MB"
 }
 
 function byteLength(str: string) {
-    var s = str.length
-    for (var i = str.length - 1; i >= 0; i--) {
-        var code = str.charCodeAt(i)
-        if (code > 0x7f && code <= 0x7ff) s++
-        else if (code > 0x7ff && code <= 0xffff) s += 2
-        if (code >= 0xdc00 && code <= 0xdfff) i-- //trail surrogate
+    let s = str.length
+    for (let i = str.length - 1; i >= 0; i--) {
+        const code = str.charCodeAt(i)
+        if (code > 0x7f && code <= 0x7ff) {
+            s++
+        } else if (code > 0x7ff && code <= 0xffff) {
+            s += 2
+        }
+        if (code >= 0xdc00 && code <= 0xdfff) {
+            i-- //trail surrogate
+        }
     }
     return s
 }
@@ -232,13 +246,13 @@ function byteLength(str: string) {
 export function calculateItemSize(): Promise<number> {
     return new Promise((resolve, reject) => {
         let result = 0
-        let openRequest = window.indexedDB.open("itemsDB")
+        const openRequest = window.indexedDB.open("itemsDB")
         openRequest.onsuccess = () => {
-            let db = openRequest.result
-            let objectStore = db.transaction("items").objectStore("items")
-            let cursorRequest = objectStore.openCursor()
+            const db = openRequest.result
+            const objectStore = db.transaction("items").objectStore("items")
+            const cursorRequest = objectStore.openCursor()
             cursorRequest.onsuccess = () => {
-                let cursor = cursorRequest.result
+                const cursor = cursorRequest.result
                 if (cursor) {
                     result += byteLength(JSON.stringify(cursor.value))
                     cursor.continue()
@@ -261,7 +275,7 @@ export function validateRegex(regex: string, flags = ""): RegExp {
 }
 
 export function platformCtrl(
-    e: React.MouseEvent | React.KeyboardEvent | MouseEvent | KeyboardEvent
+    e: React.MouseEvent | React.KeyboardEvent | MouseEvent | KeyboardEvent,
 ) {
     return window.utils.platform === "darwin" ? e.metaKey : e.ctrlKey
 }

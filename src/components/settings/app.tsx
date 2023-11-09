@@ -164,8 +164,9 @@ class AppTab extends React.Component<AppTabProps, AppTabState> {
 
     setUrl = (event: React.FormEvent) => {
         event.preventDefault()
-        if (urlTest(this.state.pacUrl))
+        if (urlTest(this.state.pacUrl)) {
             window.settings.setProxy(this.state.pacUrl)
+        }
     }
 
     onThemeChange = (_, option: IChoiceGroupOption) => {

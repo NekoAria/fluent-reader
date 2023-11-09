@@ -62,7 +62,8 @@ class LogMenu extends React.Component<LogMenuProps> {
                     directionalHint={DirectionalHint.bottomCenter}
                     calloutWidth={320}
                     calloutMaxHeight={240}
-                    onDismiss={this.props.close}>
+                    onDismiss={this.props.close}
+                >
                     {this.props.logs.length == 0 ? (
                         <p style={{ textAlign: "center" }}>
                             {intl.get("log.empty")}

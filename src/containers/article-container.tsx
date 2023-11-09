@@ -40,7 +40,7 @@ const makeMapStateToProps = () => {
             item: item,
             source: source,
             locale: locale,
-        })
+        }),
     )
 }
 
@@ -54,8 +54,12 @@ const mapDispatchToProps = (dispatch: AppDispatch) => {
             dispatch(item.hasRead ? markUnread(item) : markRead(item)),
         toggleStarred: (item: RSSItem) => dispatch(toggleStarred(item)),
         toggleHidden: (item: RSSItem) => {
-            if (!item.hidden) dispatch(dismissItem())
-            if (!item.hasRead && !item.hidden) dispatch(markRead(item))
+            if (!item.hidden) {
+                dispatch(dismissItem())
+            }
+            if (!item.hasRead && !item.hidden) {
+                dispatch(markRead(item))
+            }
             dispatch(toggleHidden(item))
         },
         textMenu: (position: [number, number], text: string, url: string) =>
@@ -65,10 +69,10 @@ const mapDispatchToProps = (dispatch: AppDispatch) => {
         dismissContextMenu: () => dispatch(closeContextMenu()),
         updateSourceTextDirection: (
             source: RSSSource,
-            direction: SourceTextDirection
+            direction: SourceTextDirection,
         ) => {
             dispatch(
-                updateSource({ ...source, textDir: direction } as RSSSource)
+                updateSource({ ...source, textDir: direction } as RSSSource),
             )
         },
     }
@@ -76,6 +80,6 @@ const mapDispatchToProps = (dispatch: AppDispatch) => {
 
 const ArticleContainer = connect(
     makeMapStateToProps,
-    mapDispatchToProps
+    mapDispatchToProps,
 )(Article)
 export default ArticleContainer

@@ -67,7 +67,9 @@ export class Menu extends React.Component<MenuProps> {
                 .filter(g => g.sids.length > 0)
                 .map(g => {
                     if (g.isMultiple) {
-                        const sources = g.sids.map(sid => this.props.sources[sid])
+                        const sources = g.sids.map(
+                            sid => this.props.sources[sid],
+                        )
                         return {
                             name: g.name,
                             ariaLabel:

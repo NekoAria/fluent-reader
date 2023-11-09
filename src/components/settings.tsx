@@ -24,17 +24,22 @@ class Settings extends React.Component<SettingsProps> {
     }
 
     onKeyDown = (event: KeyboardEvent) => {
-        if (event.key === "Escape" && !this.props.exitting) this.props.close()
+        if (event.key === "Escape" && !this.props.exitting) {
+            this.props.close()
+        }
     }
 
     componentDidUpdate = (prevProps: SettingsProps) => {
         if (this.props.display !== prevProps.display) {
             if (this.props.display) {
-                if (window.utils.platform === "darwin")
+                if (window.utils.platform === "darwin") {
                     window.utils.destroyTouchBar()
+                }
                 document.body.addEventListener("keydown", this.onKeyDown)
             } else {
-                if (window.utils.platform === "darwin") initTouchBarWithTexts()
+                if (window.utils.platform === "darwin") {
+                    initTouchBarWithTexts()
+                }
                 document.body.removeEventListener("keydown", this.onKeyDown)
             }
         }
@@ -49,13 +54,15 @@ class Settings extends React.Component<SettingsProps> {
                         position: "absolute",
                         top: 70,
                         left: "calc(50% - 404px)",
-                    }}>
+                    }}
+                >
                     <a
                         className={
                             "btn" + (this.props.exitting ? " disabled" : "")
                         }
                         title={intl.get("settings.exit")}
-                        onClick={this.props.close}>
+                        onClick={this.props.close}
+                    >
                         <Icon iconName="Back" />
                     </a>
                 </div>
@@ -63,7 +70,8 @@ class Settings extends React.Component<SettingsProps> {
                     {this.props.blocked && (
                         <FocusTrapZone
                             isClickableOutsideFocusTrap={true}
-                            className="loading">
+                            className="loading"
+                        >
                             <Spinner
                                 label={intl.get("settings.fetching")}
                                 tabIndex={0}
@@ -73,32 +81,38 @@ class Settings extends React.Component<SettingsProps> {
                     <Pivot>
                         <PivotItem
                             headerText={intl.get("settings.sources")}
-                            itemIcon="Source">
+                            itemIcon="Source"
+                        >
                             <SourcesTabContainer />
                         </PivotItem>
                         <PivotItem
                             headerText={intl.get("settings.grouping")}
-                            itemIcon="GroupList">
+                            itemIcon="GroupList"
+                        >
                             <GroupsTabContainer />
                         </PivotItem>
                         <PivotItem
                             headerText={intl.get("settings.rules")}
-                            itemIcon="FilterSettings">
+                            itemIcon="FilterSettings"
+                        >
                             <RulesTabContainer />
                         </PivotItem>
                         <PivotItem
                             headerText={intl.get("settings.service")}
-                            itemIcon="CloudImportExport">
+                            itemIcon="CloudImportExport"
+                        >
                             <ServiceTabContainer />
                         </PivotItem>
                         <PivotItem
                             headerText={intl.get("settings.app")}
-                            itemIcon="Settings">
+                            itemIcon="Settings"
+                        >
                             <AppTabContainer />
                         </PivotItem>
                         <PivotItem
                             headerText={intl.get("settings.about")}
-                            itemIcon="Info">
+                            itemIcon="Info"
+                        >
                             <AboutTab />
                         </PivotItem>
                     </Pivot>

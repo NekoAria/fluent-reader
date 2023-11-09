@@ -28,7 +28,7 @@ const mapStateToProps = createSelector(
         sources: sources,
         serviceOn: serviceOn,
         sids: sids,
-    })
+    }),
 )
 
 const mapDispatchToProps = (dispatch: AppDispatch) => {
@@ -49,10 +49,10 @@ const mapDispatchToProps = (dispatch: AppDispatch) => {
         },
         updateSourceOpenTarget: (
             source: RSSSource,
-            target: SourceOpenTarget
+            target: SourceOpenTarget,
         ) => {
             dispatch(
-                updateSource({ ...source, openTarget: target } as RSSSource)
+                updateSource({ ...source, openTarget: target } as RSSSource),
             )
         },
         updateFetchFrequency: (source: RSSSource, frequency: number) => {
@@ -60,7 +60,7 @@ const mapDispatchToProps = (dispatch: AppDispatch) => {
                 updateSource({
                     ...source,
                     fetchFrequency: frequency,
-                } as RSSSource)
+                } as RSSSource),
             )
         },
         deleteSource: (source: RSSSource) => dispatch(deleteSource(source)),
@@ -75,6 +75,6 @@ const mapDispatchToProps = (dispatch: AppDispatch) => {
 
 const SourcesTabContainer = connect(
     mapStateToProps,
-    mapDispatchToProps
+    mapDispatchToProps,
 )(SourcesTab)
 export default SourcesTabContainer

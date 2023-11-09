@@ -89,7 +89,9 @@ class GReaderConfigsTab extends React.Component<
                 endpoint: this.state.endpoint,
                 fetchLimit: this.state.fetchLimit,
             } as GReaderConfigs
-            if (this.state.password) configs.password = this.state.password
+            if (this.state.password) {
+                configs.password = this.state.password
+            }
         } else {
             configs = {
                 type: SyncService.GReader,
@@ -99,7 +101,9 @@ class GReaderConfigsTab extends React.Component<
                 fetchLimit: this.state.fetchLimit,
                 useInt64: !this.state.endpoint.endsWith("theoldreader.com"),
             }
-            if (this.state.importGroups) configs.importGroups = true
+            if (this.state.importGroups) {
+                configs.importGroups = true
+            }
         }
         this.props.blockActions()
         configs = (await this.props.reauthenticate(configs)) as GReaderConfigs
@@ -112,7 +116,7 @@ class GReaderConfigsTab extends React.Component<
             this.props.blockActions()
             window.utils.showErrorBox(
                 intl.get("service.failure"),
-                intl.get("service.failureHint")
+                intl.get("service.failureHint"),
             )
         }
     }

@@ -5,35 +5,43 @@ import { ImageCallbackTypes, TouchBarTexts } from "../schema-types"
 import { initMainTouchBar } from "./touchbar"
 import fontList = require("font-list")
 
-export function setUtilsListeners(manager: WindowManager) {
-    async function openExternal(url: string, background = false) {
-        if (url.startsWith("https://") || url.startsWith("http://")) {
-            if (background && process.platform === "darwin") {
-                shell.openExternal(url, { activate: false })
-            } else if (background && manager.hasWindow()) {
-                manager.mainWindow.setAlwaysOnTop(true)
-                await shell.openExternal(url)
-                setTimeout(() => manager.mainWindow.setAlwaysOnTop(false), 1000)
-            } else {
-                shell.openExternal(url)
-            }
+async function openExternal(
+    manager: WindowManager,
+    url: string,
+    background = false,
+) {
+    if (url.startsWith("https://") || url.startsWith("http://")) {
+        if (background && process.platform === "darwin") {
+            shell.openExternal(url, { activate: false })
+        } else if (background && manager.hasWindow()) {
+            manager.mainWindow.setAlwaysOnTop(true)
+            await shell.openExternal(url)
+            setTimeout(() => manager.mainWindow.setAlwaysOnTop(false), 1000)
+        } else {
+            shell.openExternal(url)
         }
     }
+}
 
+export function setUtilsListeners(manager: WindowManager) {
     app.on("web-contents-created", (_, contents) => {
         contents.setWindowOpenHandler(details => {
-            if (contents.getType() === "webview")
+            if (contents.getType() === "webview") {
                 openExternal(
+                    manager,
                     details.url,
-                    details.disposition === "background-tab"
+                    details.disposition === "background-tab",
                 )
+            }
             return {
                 action: manager.hasWindow() ? "deny" : "allow",
             }
         })
         contents.on("will-navigate", (event, url) => {
             event.preventDefault()
-            if (contents.getType() === "webview") openExternal(url)
+            if (contents.getType() === "webview") {
+                openExternal(manager, url)
+            }
         })
     })
 
@@ -42,7 +50,7 @@ export function setUtilsListeners(manager: WindowManager) {
     })
 
     ipcMain.handle("open-external", (_, url: string, background: boolean) => {
-        openExternal(url, background)
+        openExternal(manager, url, background)
     })
 
     ipcMain.handle(
@@ -59,7 +67,7 @@ export function setUtilsListeners(manager: WindowManager) {
                         buttons: ["OK", copy],
                         cancelId: 0,
                         defaultId: 0,
-                    }
+                    },
                 )
                 if (response.response === 1) {
                     clipboard.writeText(`${title}: ${content}`)
@@ -67,30 +75,33 @@ export function setUtilsListeners(manager: WindowManager) {
             } else {
                 dialog.showErrorBox(title, content)
             }
-        }
+        },
     )
 
     ipcMain.handle(
         "show-message-box",
         async (_, title, message, confirm, cancel, defaultCancel, type) => {
             if (manager.hasWindow()) {
-                let response = await dialog.showMessageBox(manager.mainWindow, {
-                    type: type,
-                    title: title,
-                    message: title,
-                    detail: message,
-                    buttons:
-                        process.platform === "win32"
-                            ? ["Yes", "No"]
-                            : [confirm, cancel],
-                    cancelId: 1,
-                    defaultId: defaultCancel ? 1 : 0,
-                })
+                const response = await dialog.showMessageBox(
+                    manager.mainWindow,
+                    {
+                        type: type,
+                        title: title,
+                        message: title,
+                        detail: message,
+                        buttons:
+                            process.platform === "win32"
+                                ? ["Yes", "No"]
+                                : [confirm, cancel],
+                        cancelId: 1,
+                        defaultId: defaultCancel ? 1 : 0,
+                    },
+                )
                 return response.response === 0
             } else {
                 return false
             }
-        }
+        },
     )
 
     ipcMain.handle(
@@ -98,40 +109,47 @@ export function setUtilsListeners(manager: WindowManager) {
         async (_, filters: Electron.FileFilter[], path: string) => {
             ipcMain.removeAllListeners("write-save-result")
             if (manager.hasWindow()) {
-                let response = await dialog.showSaveDialog(manager.mainWindow, {
-                    defaultPath: path,
-                    filters: filters,
-                })
+                const response = await dialog.showSaveDialog(
+                    manager.mainWindow,
+                    {
+                        defaultPath: path,
+                        filters: filters,
+                    },
+                )
                 if (!response.canceled) {
                     ipcMain.handleOnce(
                         "write-save-result",
                         (_, result, errmsg) => {
                             fs.writeFile(response.filePath, result, err => {
-                                if (err)
+                                if (err) {
                                     dialog.showErrorBox(errmsg, String(err))
+                                }
                             })
-                        }
+                        },
                     )
                     return true
                 }
             }
             return false
-        }
+        },
     )
 
     ipcMain.handle(
         "show-open-dialog",
         async (_, filters: Electron.FileFilter[]) => {
             if (manager.hasWindow()) {
-                let response = await dialog.showOpenDialog(manager.mainWindow, {
-                    filters: filters,
-                    properties: ["openFile"],
-                })
+                const response = await dialog.showOpenDialog(
+                    manager.mainWindow,
+                    {
+                        filters: filters,
+                        properties: ["openFile"],
+                    },
+                )
                 if (!response.canceled) {
                     try {
                         return await fs.promises.readFile(
                             response.filePaths[0],
-                            "utf-8"
+                            "utf-8",
                         )
                     } catch (err) {
                         console.log(err)
@@ -139,7 +157,7 @@ export function setUtilsListeners(manager: WindowManager) {
                 }
             }
             return null
-        }
+        },
     )
 
     ipcMain.handle("get-cache", async () => {
@@ -158,10 +176,10 @@ export function setUtilsListeners(manager: WindowManager) {
                     if (isMainFrame && manager.hasWindow()) {
                         manager.mainWindow.webContents.send(
                             "webview-error",
-                            desc
+                            desc,
                         )
                     }
-                }
+                },
             )
             contents.on("context-menu", (_, params) => {
                 if (
@@ -179,14 +197,15 @@ export function setUtilsListeners(manager: WindowManager) {
                                     case ImageCallbackTypes.OpenExternal:
                                     case ImageCallbackTypes.OpenExternalBg:
                                         openExternal(
+                                            manager,
                                             params.srcURL,
                                             type ===
-                                                ImageCallbackTypes.OpenExternalBg
+                                                ImageCallbackTypes.OpenExternalBg,
                                         )
                                         break
                                     case ImageCallbackTypes.SaveAs:
                                         contents.session.downloadURL(
-                                            params.srcURL
+                                            params.srcURL,
                                         )
                                         break
                                     case ImageCallbackTypes.Copy:
@@ -196,18 +215,18 @@ export function setUtilsListeners(manager: WindowManager) {
                                         clipboard.writeText(params.srcURL)
                                         break
                                 }
-                            }
+                            },
                         )
                         manager.mainWindow.webContents.send(
                             "webview-context-menu",
-                            [params.x, params.y]
+                            [params.x, params.y],
                         )
                     } else {
                         manager.mainWindow.webContents.send(
                             "webview-context-menu",
                             [params.x, params.y],
                             params.selectionText,
-                            params.linkURL
+                            params.linkURL,
                         )
                     }
                     contents
@@ -220,12 +239,12 @@ export function setUtilsListeners(manager: WindowManager) {
                         }
                         document.addEventListener("mousedown", dismiss)
                         document.addEventListener("scroll", dismiss)
-                    })`
+                    })`,
                         )
                         .then(() => {
                             if (manager.hasWindow()) {
                                 manager.mainWindow.webContents.send(
-                                    "webview-context-menu"
+                                    "webview-context-menu",
                                 )
                             }
                         })
@@ -233,7 +252,7 @@ export function setUtilsListeners(manager: WindowManager) {
             })
             contents.on("before-input-event", (_, input) => {
                 if (manager.hasWindow()) {
-                    let contents = manager.mainWindow.webContents
+                    const contents = manager.mainWindow.webContents
                     contents.send("webview-keydown", input)
                 }
             })
@@ -245,11 +264,15 @@ export function setUtilsListeners(manager: WindowManager) {
     })
 
     ipcMain.handle("close-window", () => {
-        if (manager.hasWindow()) manager.mainWindow.close()
+        if (manager.hasWindow()) {
+            manager.mainWindow.close()
+        }
     })
 
     ipcMain.handle("minimize-window", () => {
-        if (manager.hasWindow()) manager.mainWindow.minimize()
+        if (manager.hasWindow()) {
+            manager.mainWindow.minimize()
+        }
     })
 
     ipcMain.handle("maximize-window", () => {
@@ -274,7 +297,9 @@ export function setUtilsListeners(manager: WindowManager) {
     ipcMain.handle("request-focus", () => {
         if (manager.hasWindow()) {
             const win = manager.mainWindow
-            if (win.isMinimized()) win.restore()
+            if (win.isMinimized()) {
+                win.restore()
+            }
             if (process.platform === "win32") {
                 win.setAlwaysOnTop(true)
                 win.setAlwaysOnTop(false)
@@ -297,10 +322,14 @@ export function setUtilsListeners(manager: WindowManager) {
     })
 
     ipcMain.handle("touchbar-init", (_, texts: TouchBarTexts) => {
-        if (manager.hasWindow()) initMainTouchBar(texts, manager.mainWindow)
+        if (manager.hasWindow()) {
+            initMainTouchBar(texts, manager.mainWindow)
+        }
     })
     ipcMain.handle("touchbar-destroy", () => {
-        if (manager.hasWindow()) manager.mainWindow.setTouchBar(null)
+        if (manager.hasWindow()) {
+            manager.mainWindow.setTouchBar(null)
+        }
     })
 
     ipcMain.handle("init-font-list", () => {

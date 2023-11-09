@@ -88,7 +88,9 @@ class NextcloudConfigsTab extends React.Component<
                 endpoint: this.state.endpoint,
                 fetchLimit: this.state.fetchLimit,
             } as NextcloudConfigs
-            if (this.state.password) configs.password = this.state.password
+            if (this.state.password) {
+                configs.password = this.state.password
+            }
         } else {
             configs = {
                 type: SyncService.Nextcloud,
@@ -97,7 +99,9 @@ class NextcloudConfigsTab extends React.Component<
                 password: this.state.password,
                 fetchLimit: this.state.fetchLimit,
             }
-            if (this.state.importGroups) configs.importGroups = true
+            if (this.state.importGroups) {
+                configs.importGroups = true
+            }
         }
         this.props.blockActions()
         const valid = await this.props.authenticate(configs)
@@ -109,7 +113,7 @@ class NextcloudConfigsTab extends React.Component<
             this.props.blockActions()
             window.utils.showErrorBox(
                 intl.get("service.failure"),
-                intl.get("service.failureHint")
+                intl.get("service.failureHint"),
             )
         }
     }

@@ -23,7 +23,7 @@ async function fetchAPI(configs: NextcloudConfigs, params: string) {
     const headers = new Headers()
     headers.set(
         "Authorization",
-        "Basic " + btoa(configs.username + ":" + configs.password)
+        "Basic " + btoa(configs.username + ":" + configs.password),
     )
     return await fetch(configs.endpoint + params, { headers: headers })
 }
@@ -32,12 +32,12 @@ async function markItems(
     configs: NextcloudConfigs,
     type: string,
     method: string,
-    refs: number[]
+    refs: number[],
 ) {
     const headers = new Headers()
     headers.set(
         "Authorization",
-        "Basic " + btoa(configs.username + ":" + configs.password)
+        "Basic " + btoa(configs.username + ":" + configs.password),
     )
     headers.set("Content-Type", "application/json; charset=utf-8")
     const promises = new Array<Promise<Response>>()
@@ -53,7 +53,7 @@ async function markItems(
                 method: method,
                 headers: headers,
                 body: JSON.stringify(bodyObject),
-            })
+            }),
         )
     }
     return await Promise.all(promises)
@@ -74,17 +74,21 @@ export const nextcloudServiceHooks: ServiceHooks = {
     updateSources: () => async (dispatch, getState) => {
         const configs = getState().service as NextcloudConfigs
         const response = await fetchAPI(configs, "/feeds")
-        if (response.status !== 200) throw APIError()
+        if (response.status !== 200) {
+            throw APIError()
+        }
         const feeds = await response.json()
         let groupsMap: Map<string, string>
-        let groupsByTagId: Map<string, string> = new Map()
+        const groupsByTagId: Map<string, string> = new Map()
         if (configs.importGroups) {
             const foldersResponse = await fetchAPI(configs, "/folders")
-            if (foldersResponse.status !== 200) throw APIError()
+            if (foldersResponse.status !== 200) {
+                throw APIError()
+            }
             const folders = await foldersResponse.json()
             const foldersSet = new Set<string>()
             groupsMap = new Map()
-            for (let folder of folders.folders) {
+            for (const folder of folders.folders) {
                 const title = folder.name.trim()
                 if (!foldersSet.has(title)) {
                     foldersSet.add(title)
@@ -100,7 +104,7 @@ export const nextcloudServiceHooks: ServiceHooks = {
             if (s.folderId && groupsByTagId.has(String(s.folderId))) {
                 groupsMap.set(
                     String(s.id),
-                    groupsByTagId.get(String(s.folderId))
+                    groupsByTagId.get(String(s.folderId)),
                 )
             }
             return source
@@ -114,8 +118,9 @@ export const nextcloudServiceHooks: ServiceHooks = {
             fetchAPI(configs, "/items?getRead=false&type=3&batchSize=-1"),
             fetchAPI(configs, "/items?getRead=true&type=2&batchSize=-1"),
         ])
-        if (unreadResponse.status !== 200 || starredResponse.status !== 200)
+        if (unreadResponse.status !== 200 || starredResponse.status !== 200) {
             throw APIError()
+        }
         const unread = await unreadResponse.json()
         const starred = await starredResponse.json()
         return [
@@ -127,7 +132,7 @@ export const nextcloudServiceHooks: ServiceHooks = {
     fetchItems: () => async (_, getState) => {
         const state = getState()
         const configs = state.service as NextcloudConfigs
-        let items = new Array()
+        let items = []
         configs.lastModified = configs.lastModified || 0
         configs.lastId = configs.lastId || 0
         let lastFetched: any
@@ -138,9 +143,11 @@ export const nextcloudServiceHooks: ServiceHooks = {
             do {
                 const response = await fetchAPI(
                     configs,
-                    "/items?getRead=true&type=3&batchSize=125&offset=" + min
+                    "/items?getRead=true&type=3&batchSize=125&offset=" + min,
                 )
-                if (response.status !== 200) throw APIError()
+                if (response.status !== 200) {
+                    throw APIError()
+                }
                 lastFetched = await response.json()
                 items = [...items, ...lastFetched.items]
                 min = lastFetched.items.reduce((m, n) => Math.min(m, n.id), min)
@@ -155,24 +162,26 @@ export const nextcloudServiceHooks: ServiceHooks = {
                 configs,
                 "/items/updated?lastModified=" +
                     configs.lastModified +
-                    "&type=3"
+                    "&type=3",
             )
-            if (response.status !== 200) throw APIError()
+            if (response.status !== 200) {
+                throw APIError()
+            }
             lastFetched = (await response.json()).items
             items.push(...lastFetched.filter(i => i.id > configs.lastId))
         }
         configs.lastModified = items.reduce(
             (m, n) => Math.max(m, n.lastModified),
-            configs.lastModified
+            configs.lastModified,
         )
         configs.lastId = items.reduce(
             (m, n) => Math.max(m, n.id),
-            configs.lastId
+            configs.lastId,
         )
         configs.lastModified++ //+1 to avoid fetching articles with same lastModified next time
         if (items.length > 0) {
             const fidMap = new Map<string, RSSSource>()
-            for (let source of Object.values(state.sources)) {
+            for (const source of Object.values(state.sources)) {
                 if (source.serviceRef) {
                     fidMap.set(source.serviceRef, source)
                 }
@@ -180,7 +189,9 @@ export const nextcloudServiceHooks: ServiceHooks = {
 
             const parsedItems = new Array<RSSItem>()
             items.forEach(i => {
-                if (i.body === null || i.url === null) return
+                if (i.body === null || i.url === null) {
+                    return
+                }
                 const unreadItem = i.unread
                 const starredItem = i.starred
                 const source = fidMap.get(String(i.feedId))
@@ -203,31 +214,37 @@ export const nextcloudServiceHooks: ServiceHooks = {
                 if (i.enclosureLink) {
                     item.thumb = i.enclosureLink
                 } else {
-                    let baseEl = dom.createElement("base")
+                    const baseEl = dom.createElement("base")
                     baseEl.setAttribute(
                         "href",
-                        item.link.split("/").slice(0, 3).join("/")
+                        item.link.split("/").slice(0, 3).join("/"),
                     )
                     dom.head.append(baseEl)
-                    let img = dom.querySelector("img")
-                    if (img && img.src) item.thumb = img.src
+                    const img = dom.querySelector("img")
+                    if (img && img.src) {
+                        item.thumb = img.src
+                    }
                 }
                 // Apply rules and sync back to the service
-                if (source.rules) SourceRule.applyAll(source.rules, item)
-                if (unreadItem && item.hasRead)
+                if (source.rules) {
+                    SourceRule.applyAll(source.rules, item)
+                }
+                if (unreadItem && item.hasRead) {
                     markItems(
                         configs,
                         item.hasRead ? "read" : "unread",
                         "POST",
-                        [i.id]
+                        [i.id],
                     )
-                if (starredItem !== Boolean(item.starred))
+                }
+                if (starredItem !== Boolean(item.starred)) {
                     markItems(
                         configs,
                         item.starred ? "star" : "unstar",
                         "POST",
-                        [i.id]
+                        [i.id],
                     )
+                }
 
                 parsedItems.push(item)
             })
@@ -247,7 +264,7 @@ export const nextcloudServiceHooks: ServiceHooks = {
         ]
         if (date) {
             predicates.push(
-                before ? db.items.date.lte(date) : db.items.date.gte(date)
+                before ? db.items.date.lte(date) : db.items.date.gte(date),
             )
         }
         const query = lf.op.and.apply(null, predicates)
@@ -265,7 +282,7 @@ export const nextcloudServiceHooks: ServiceHooks = {
             getState().service as NextcloudConfigs,
             "read",
             "POST",
-            [parseInt(item.serviceRef)]
+            [parseInt(item.serviceRef)],
         )
     },
 
@@ -274,7 +291,7 @@ export const nextcloudServiceHooks: ServiceHooks = {
             getState().service as NextcloudConfigs,
             "unread",
             "POST",
-            [parseInt(item.serviceRef)]
+            [parseInt(item.serviceRef)],
         )
     },
 
@@ -283,7 +300,7 @@ export const nextcloudServiceHooks: ServiceHooks = {
             getState().service as NextcloudConfigs,
             "star",
             "POST",
-            [parseInt(item.serviceRef)]
+            [parseInt(item.serviceRef)],
         )
     },
 
@@ -292,7 +309,7 @@ export const nextcloudServiceHooks: ServiceHooks = {
             getState().service as NextcloudConfigs,
             "unstar",
             "POST",
-            [parseInt(item.serviceRef)]
+            [parseInt(item.serviceRef)],
         )
     },
 }

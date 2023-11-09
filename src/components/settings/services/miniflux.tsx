@@ -109,13 +109,14 @@ class MinifluxConfigsTab extends React.Component<
                 fetchLimit: this.state.fetchLimit,
             } as MinifluxConfigs
 
-            if (this.state.apiKey || this.state.password)
+            if (this.state.apiKey || this.state.password) {
                 configs.authKey = this.state.apiKeyAuth
                     ? this.state.apiKey
                     : Buffer.from(
                           this.state.username + ":" + this.state.password,
-                          "binary"
+                          "binary",
                       ).toString("base64")
+            }
         } else {
             configs = {
                 type: SyncService.Miniflux,
@@ -125,12 +126,14 @@ class MinifluxConfigsTab extends React.Component<
                     ? this.state.apiKey
                     : Buffer.from(
                           this.state.username + ":" + this.state.password,
-                          "binary"
+                          "binary",
                       ).toString("base64"),
                 fetchLimit: this.state.fetchLimit,
             }
 
-            if (this.state.importGroups) configs.importGroups = true
+            if (this.state.importGroups) {
+                configs.importGroups = true
+            }
         }
 
         this.props.blockActions()
@@ -144,7 +147,7 @@ class MinifluxConfigsTab extends React.Component<
             this.props.blockActions()
             window.utils.showErrorBox(
                 intl.get("service.failure"),
-                intl.get("service.failureHint")
+                intl.get("service.failureHint"),
             )
         }
     }

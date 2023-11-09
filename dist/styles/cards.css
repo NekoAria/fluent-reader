@@ -104,7 +104,9 @@
     background-color: var(--white);
     box-shadow: #0004 0 5px 20px;
     margin: 18px 12px;
-    transition: box-shadow linear 0.08s, transform linear 0.08s;
+    transition:
+        box-shadow linear 0.08s,
+        transform linear 0.08s;
     animation-fill-mode: none;
 }
 .default-card:hover,
@@ -191,7 +193,9 @@
     box-shadow: #0004 0 5px 15px;
 }
 .list-card:active {
-    box-shadow: #0000 0 5px 15px, inset #0004 0 0 15px;
+    box-shadow:
+        #0000 0 5px 15px,
+        inset #0004 0 0 15px;
 }
 .list-card div.head {
     width: 80px;
@@ -251,7 +255,9 @@
     padding: 24px;
     max-height: 160px;
     display: flex;
-    transition: box-shadow linear 0.08s, background-color linear 0.08s,
+    transition:
+        box-shadow linear 0.08s,
+        background-color linear 0.08s,
         transform linear 0.08s;
     border-bottom: 1px solid var(--neutralQuaternaryAlt);
     box-shadow: #0000 0 5px 20px;
@@ -319,7 +325,9 @@
     font-size: 14px;
     line-height: 31px;
     padding: 0 9px;
-    transition: box-shadow linear 0.08s, background-color linear 0.08s;
+    transition:
+        box-shadow linear 0.08s,
+        background-color linear 0.08s;
 }
 .compact-card:hover,
 .ms-Fabric--isFocusVisible .compact-card:focus {

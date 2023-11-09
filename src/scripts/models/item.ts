@@ -42,9 +42,11 @@ export class RSSItem {
     serviceRef?: string
 
     constructor(item: MyParserItem, source: RSSSource) {
-        for (let field of ["title", "link", "creator"]) {
+        for (const field of ["title", "link", "creator"]) {
             const content = item[field]
-            if (content && typeof content !== "string") delete item[field]
+            if (content && typeof content !== "string") {
+                delete item[field]
+            }
         }
         this.source = source.sid
         this.title = item.title || intl.get("article.untitled")
@@ -59,9 +61,11 @@ export class RSSItem {
     }
 
     static parseContent(item: RSSItem, parsed: MyParserItem) {
-        for (let field of ["thumb", "content", "fullContent"]) {
+        for (const field of ["thumb", "content", "fullContent"]) {
             const content = parsed[field]
-            if (content && typeof content !== "string") delete parsed[field]
+            if (content && typeof content !== "string") {
+                delete parsed[field]
+            }
         }
         if (parsed.fullContent) {
             item.content = parsed.fullContent
@@ -77,21 +81,25 @@ export class RSSItem {
         } else if (parsed.image && typeof parsed.image === "string") {
             item.thumb = parsed.image
         } else if (parsed.mediaContent) {
-            let images = parsed.mediaContent.filter(
-                c => c.$ && c.$.medium === "image" && c.$.url
+            const images = parsed.mediaContent.filter(
+                c => c.$ && c.$.medium === "image" && c.$.url,
             )
-            if (images.length > 0) item.thumb = images[0].$.url
+            if (images.length > 0) {
+                item.thumb = images[0].$.url
+            }
         }
         if (!item.thumb) {
-            let dom = domParser.parseFromString(item.content, "text/html")
-            let baseEl = dom.createElement("base")
+            const dom = domParser.parseFromString(item.content, "text/html")
+            const baseEl = dom.createElement("base")
             baseEl.setAttribute(
                 "href",
-                item.link.split("/").slice(0, 3).join("/")
+                item.link.split("/").slice(0, 3).join("/"),
             )
             dom.head.append(baseEl)
-            let img = dom.querySelector("img")
-            if (img && img.src) item.thumb = img.src
+            const img = dom.querySelector("img")
+            if (img && img.src) {
+                item.thumb = img.src
+            }
         }
         if (
             item.thumb &&
@@ -169,7 +177,7 @@ export function fetchItemsRequest(fetchCount = 0): ItemActionTypes {
 
 export function fetchItemsSuccess(
     items: RSSItem[],
-    itemState: ItemState
+    itemState: ItemState,
 ): ItemActionTypes {
     return {
         type: FETCH_ITEMS,
@@ -207,25 +215,28 @@ export async function insertItems(items: RSSItem[]): Promise<RSSItem[]> {
 
 export function fetchItems(
     background = false,
-    sids: number[] = null
+    sids: number[] = null,
 ): AppThunk<Promise<void>> {
     return async (dispatch, getState) => {
-        let promises = new Array<Promise<RSSItem[]>>()
+        const promises = new Array<Promise<RSSItem[]>>()
         const initState = getState()
         if (!initState.app.fetchingItems && !initState.app.syncing) {
             if (
                 sids === null ||
                 sids.filter(
-                    sid => initState.sources[sid].serviceRef !== undefined
+                    sid => initState.sources[sid].serviceRef !== undefined,
                 ).length > 0
-            )
+            ) {
                 await dispatch(syncWithService(background))
-            let timenow = new Date().getTime()
+            }
+            const timenow = new Date().getTime()
             const sourcesState = getState().sources
-            let sources =
+            const sources =
                 sids === null
                     ? Object.values(sourcesState).filter(s => {
-                          let last = s.lastFetched ? s.lastFetched.getTime() : 0
+                          const last = s.lastFetched
+                              ? s.lastFetched.getTime()
+                              : 0
                           return (
                               !s.serviceRef &&
                               (last > timenow ||
@@ -236,12 +247,12 @@ export function fetchItems(
                     : sids
                           .map(sid => sourcesState[sid])
                           .filter(s => !s.serviceRef)
-            for (let source of sources) {
-                let promise = RSSSource.fetchItems(source)
+            for (const source of sources) {
+                const promise = RSSSource.fetchItems(source)
                 promise.then(() =>
                     dispatch(
-                        updateSource({ ...source, lastFetched: new Date() })
-                    )
+                        updateSource({ ...source, lastFetched: new Date() }),
+                    ),
                 )
                 promise.finally(() => dispatch(fetchItemsIntermediate()))
                 promises.push(promise)
@@ -249,10 +260,11 @@ export function fetchItems(
             dispatch(fetchItemsRequest(promises.length))
             const results = await Promise.allSettled(promises)
             return await new Promise<void>((resolve, reject) => {
-                let items = new Array<RSSItem>()
+                const items = new Array<RSSItem>()
                 results.map((r, i) => {
-                    if (r.status === "fulfilled") items.push(...r.value)
-                    else {
+                    if (r.status === "fulfilled") {
+                        items.push(...r.value)
+                    } else {
                         console.log(r.reason)
                         dispatch(fetchItemsFailure(sources[i], r.reason))
                     }
@@ -262,12 +274,12 @@ export function fetchItems(
                         dispatch(
                             fetchItemsSuccess(
                                 inserted.reverse(),
-                                getState().items
-                            )
+                                getState().items,
+                            ),
                         )
                         resolve()
                         if (background) {
-                            for (let item of inserted) {
+                            for (const item of inserted) {
                                 if (item.notify) {
                                     dispatch(pushNotification(item))
                                 }
@@ -284,7 +296,7 @@ export function fetchItems(
                         dispatch(fetchItemsSuccess([], getState().items))
                         window.utils.showErrorBox(
                             "A database error has occurred.",
-                            String(err)
+                            String(err),
                         )
                         console.log(err)
                         reject(err)
@@ -324,27 +336,29 @@ export function markRead(item: RSSItem): AppThunk {
 export function markAllRead(
     sids: number[] = null,
     date: Date = null,
-    before = true
+    before = true,
 ): AppThunk<Promise<void>> {
     return async (dispatch, getState) => {
-        let state = getState()
+        const state = getState()
         if (sids === null) {
-            let feed = state.feeds[state.page.feedId]
+            const feed = state.feeds[state.page.feedId]
             sids = feed.sids
         }
         const action = dispatch(getServiceHooks()).markAllRead?.(
             sids,
             date,
-            before
+            before,
         )
-        if (action) await dispatch(action)
+        if (action) {
+            await dispatch(action)
+        }
         const predicates: lf.Predicate[] = [
             db.items.source.in(sids),
             db.items.hasRead.eq(false),
         ]
         if (date) {
             predicates.push(
-                before ? db.items.date.lte(date) : db.items.date.gte(date)
+                before ? db.items.date.lte(date) : db.items.date.gte(date),
             )
         }
         const query = lf.op.and.apply(null, predicates)
@@ -402,8 +416,11 @@ export function toggleStarred(item: RSSItem): AppThunk {
         dispatch(toggleStarredDone(item))
         if (item.serviceRef) {
             const hooks = dispatch(getServiceHooks())
-            if (item.starred) dispatch(hooks.unstar?.(item))
-            else dispatch(hooks.star?.(item))
+            if (item.starred) {
+                dispatch(hooks.unstar?.(item))
+            } else {
+                dispatch(hooks.star?.(item))
+            }
         }
     }
 }
@@ -426,16 +443,23 @@ export function toggleHidden(item: RSSItem): AppThunk {
 
 export function itemShortcuts(item: RSSItem, e: KeyboardEvent): AppThunk {
     return dispatch => {
-        if (e.metaKey) return
+        if (e.metaKey) {
+            return
+        }
         switch (e.key) {
             case "m":
             case "M":
-                if (item.hasRead) dispatch(markUnread(item))
-                else dispatch(markRead(item))
+                if (item.hasRead) {
+                    dispatch(markUnread(item))
+                } else {
+                    dispatch(markRead(item))
+                }
                 break
             case "b":
             case "B":
-                if (!item.hasRead) dispatch(markRead(item))
+                if (!item.hasRead) {
+                    dispatch(markRead(item))
+                }
                 window.utils.openExternal(item.link, platformCtrl(e))
                 break
             case "s":
@@ -444,7 +468,9 @@ export function itemShortcuts(item: RSSItem, e: KeyboardEvent): AppThunk {
                 break
             case "h":
             case "H":
-                if (!item.hasRead && !item.hidden) dispatch(markRead(item))
+                if (!item.hasRead && !item.hidden) {
+                    dispatch(markRead(item))
+                }
                 dispatch(toggleHidden(item))
                 break
         }
@@ -452,7 +478,7 @@ export function itemShortcuts(item: RSSItem, e: KeyboardEvent): AppThunk {
 }
 
 export function applyItemReduction(item: RSSItem, type: string) {
-    let nextItem = { ...item }
+    const nextItem = { ...item }
     switch (type) {
         case MARK_READ:
         case MARK_UNREAD: {
@@ -477,14 +503,14 @@ export function itemReducer(
         | ItemActionTypes
         | FeedActionTypes
         | ServiceActionTypes
-        | SettingsActionTypes
+        | SettingsActionTypes,
 ): ItemState {
     switch (action.type) {
         case FETCH_ITEMS:
             switch (action.status) {
                 case ActionStatus.Success: {
-                    let newMap = {}
-                    for (let i of action.items) {
+                    const newMap = {}
+                    for (const i of action.items) {
                         newMap[i._id] = i
                     }
                     return { ...newMap, ...state }
@@ -500,25 +526,25 @@ export function itemReducer(
                 ...state,
                 [action.item._id]: applyItemReduction(
                     state[action.item._id],
-                    action.type
+                    action.type,
                 ),
             }
         }
         case MARK_ALL_READ: {
-            let nextState = { ...state }
-            let sids = new Set(action.sids)
-            for (let item of Object.values(state)) {
-                if (sids.has(item.source) && !item.hasRead) {
-                    if (
-                        !action.time ||
+            const nextState = { ...state }
+            const sids = new Set(action.sids)
+            for (const item of Object.values(state)) {
+                if (
+                    sids.has(item.source) &&
+                    !item.hasRead &&
+                    (!action.time ||
                         (action.before
                             ? item.date.getTime() <= action.time
-                            : item.date.getTime() >= action.time)
-                    ) {
-                        nextState[item._id] = {
-                            ...item,
-                            hasRead: true,
-                        }
+                            : item.date.getTime() >= action.time))
+                ) {
+                    nextState[item._id] = {
+                        ...item,
+                        hasRead: true,
                     }
                 }
             }
@@ -528,8 +554,8 @@ export function itemReducer(
         case INIT_FEED: {
             switch (action.status) {
                 case ActionStatus.Success: {
-                    let nextState = { ...state }
-                    for (let i of action.items) {
+                    const nextState = { ...state }
+                    for (const i of action.items) {
                         nextState[i._id] = i
                     }
                     return nextState
@@ -539,8 +565,8 @@ export function itemReducer(
             }
         }
         case SYNC_LOCAL_ITEMS: {
-            let nextState = { ...state }
-            for (let item of Object.values(state)) {
+            const nextState = { ...state }
+            for (const item of Object.values(state)) {
                 if (item.hasOwnProperty("serviceRef")) {
                     const nextItem = { ...item }
                     nextItem.hasRead = !action.unreadIds.has(item.serviceRef)
@@ -552,8 +578,10 @@ export function itemReducer(
         }
         case FREE_MEMORY: {
             const nextState: ItemState = {}
-            for (let item of Object.values(state)) {
-                if (action.iids.has(item._id)) nextState[item._id] = item
+            for (const item of Object.values(state)) {
+                if (action.iids.has(item._id)) {
+                    nextState[item._id] = item
+                }
             }
             return nextState
         }

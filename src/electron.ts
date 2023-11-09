@@ -11,9 +11,11 @@ if (!process.mas) {
     }
 }
 
-if (!app.isPackaged) app.setAppUserModelId(process.execPath)
-else if (process.platform === "win32")
+if (!app.isPackaged) {
+    app.setAppUserModelId(process.execPath)
+} else if (process.platform === "win32") {
     app.setAppUserModelId("me.hyliu.fluentreader")
+}
 
 let restarting = false
 
@@ -40,7 +42,9 @@ if (process.platform === "darwin") {
                     label: "Quit",
                     accelerator: "Command+Q",
                     click: () => {
-                        if (winManager.hasWindow) winManager.mainWindow.close()
+                        if (winManager.hasWindow) {
+                            winManager.mainWindow.close()
+                        }
                     },
                 },
             ],
@@ -83,15 +87,18 @@ if (process.platform === "darwin") {
                     label: "Close",
                     accelerator: "Command+W",
                     click: () => {
-                        if (winManager.hasWindow) winManager.mainWindow.close()
+                        if (winManager.hasWindow) {
+                            winManager.mainWindow.close()
+                        }
                     },
                 },
                 {
                     label: "Minimize",
                     accelerator: "Command+M",
                     click: () => {
-                        if (winManager.hasWindow())
+                        if (winManager.hasWindow()) {
                             winManager.mainWindow.minimize()
+                        }
                     },
                 },
                 { label: "Zoom", click: () => winManager.zoom() },
@@ -123,7 +130,7 @@ app.on("window-all-closed", () => {
 ipcMain.handle("import-all-settings", (_, configs: SchemaTypes) => {
     restarting = true
     store.clear()
-    for (let [key, value] of Object.entries(configs)) {
+    for (const [key, value] of Object.entries(configs)) {
         // @ts-ignore
         store.set(key, value)
     }
@@ -133,6 +140,6 @@ ipcMain.handle("import-all-settings", (_, configs: SchemaTypes) => {
         () => {
             winManager.mainWindow.close()
         },
-        process.platform === "darwin" ? 1000 : 0
+        process.platform === "darwin" ? 1000 : 0,
     ) // Why ???
 })

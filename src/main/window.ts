@@ -67,7 +67,7 @@ export class WindowManager {
                     spellcheck: false,
                     preload: path.join(
                         app.getAppPath(),
-                        (app.isPackaged ? "dist/" : "") + "preload.js"
+                        (app.isPackaged ? "dist/" : "") + "preload.js",
                     ),
                 },
             })
@@ -75,10 +75,12 @@ export class WindowManager {
             this.mainWindow.on("ready-to-show", () => {
                 this.mainWindow.show()
                 this.mainWindow.focus()
-                if (!app.isPackaged) this.mainWindow.webContents.openDevTools()
+                if (!app.isPackaged) {
+                    this.mainWindow.webContents.openDevTools()
+                }
             })
             this.mainWindow.loadFile(
-                (app.isPackaged ? "dist/" : "") + "index.html"
+                (app.isPackaged ? "dist/" : "") + "index.html",
             )
 
             this.mainWindow.on("maximize", () => {
@@ -104,7 +106,7 @@ export class WindowManager {
                     this.mainWindow.webContents.send(
                         "window-context-menu",
                         [params.x, params.y],
-                        params.selectionText
+                        params.selectionText,
                     )
                 }
             })

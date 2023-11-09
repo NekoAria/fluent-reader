@@ -6,9 +6,13 @@ import Highlights from "./highlights"
 import { SourceTextDirection } from "../../scripts/models/source"
 
 const className = (props: Card.Props) => {
-    let cn = ["card", "compact-card"]
-    if (props.item.hidden) cn.push("hidden")
-    if (props.source.textDir === SourceTextDirection.RTL) cn.push("rtl")
+    const cn = ["card", "compact-card"]
+    if (props.item.hidden) {
+        cn.push("hidden")
+    }
+    if (props.source.textDir === SourceTextDirection.RTL) {
+        cn.push("rtl")
+    }
     return cn.join(" ")
 }
 
@@ -17,7 +21,8 @@ const CompactCard: React.FunctionComponent<Card.Props> = props => (
         className={className(props)}
         {...Card.bindEventsToProps(props)}
         data-iid={props.item._id}
-        data-is-focusable>
+        data-is-focusable
+    >
         <CardInfo source={props.source} item={props.item} hideTime />
         <div className="data">
             <span className="title">

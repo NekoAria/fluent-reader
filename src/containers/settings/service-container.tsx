@@ -25,13 +25,18 @@ const mapDispatchToProps = (dispatch: AppDispatch) => ({
     sync: () => dispatch(syncWithService()),
     authenticate: async (configs: ServiceConfigs) => {
         const hooks = getServiceHooksFromType(configs.type)
-        if (hooks.authenticate) return await hooks.authenticate(configs)
-        else return true
+        if (hooks.authenticate) {
+            return await hooks.authenticate(configs)
+        } else {
+            return true
+        }
     },
     reauthenticate: async (configs: ServiceConfigs) => {
         const hooks = getServiceHooksFromType(configs.type)
         try {
-            if (hooks.reauthenticate) return await hooks.reauthenticate(configs)
+            if (hooks.reauthenticate) {
+                return await hooks.reauthenticate(configs)
+            }
         } catch (err) {
             console.log(err)
             return configs
@@ -41,6 +46,6 @@ const mapDispatchToProps = (dispatch: AppDispatch) => ({
 
 const ServiceTabContainer = connect(
     mapStateToProps,
-    mapDispatchToProps
+    mapDispatchToProps,
 )(ServiceTab)
 export default ServiceTabContainer

@@ -5,10 +5,16 @@ import Highlights from "./highlights"
 import { SourceTextDirection } from "../../scripts/models/source"
 
 const className = (props: Card.Props) => {
-    let cn = ["card", "default-card"]
-    if (props.item.snippet && props.item.thumb) cn.push("transform")
-    if (props.item.hidden) cn.push("hidden")
-    if (props.source.textDir === SourceTextDirection.RTL) cn.push("rtl")
+    const cn = ["card", "default-card"]
+    if (props.item.snippet && props.item.thumb) {
+        cn.push("transform")
+    }
+    if (props.item.hidden) {
+        cn.push("hidden")
+    }
+    if (props.source.textDir === SourceTextDirection.RTL) {
+        cn.push("rtl")
+    }
     return cn.join(" ")
 }
 
@@ -17,7 +23,8 @@ const DefaultCard: React.FunctionComponent<Card.Props> = props => (
         className={className(props)}
         {...Card.bindEventsToProps(props)}
         data-iid={props.item._id}
-        data-is-focusable>
+        data-is-focusable
+    >
         {props.item.thumb ? (
             <img className="bg" src={props.item.thumb} />
         ) : null}

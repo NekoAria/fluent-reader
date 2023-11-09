@@ -76,7 +76,7 @@ const mapStateToProps = createSelector(
             default:
                 return { type: ContextMenuType.Hidden }
         }
-    }
+    },
 )
 
 const mapDispatchToProps = dispatch => {

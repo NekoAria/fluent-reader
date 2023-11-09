@@ -36,7 +36,7 @@ type SourcesTabProps = {
     updateSourceIcon: (source: RSSSource, iconUrl: string) => Promise<void>
     updateSourceOpenTarget: (
         source: RSSSource,
-        target: SourceOpenTarget
+        target: SourceOpenTarget,
     ) => void
     updateFetchFrequency: (source: RSSSource, frequency: number) => void
     deleteSource: (source: RSSSource) => void
@@ -73,8 +73,8 @@ class SourcesTab extends React.Component<SourcesTabProps, SourcesTabState> {
         this.selection = new Selection({
             getKey: s => (s as RSSSource).sid,
             onSelectionChanged: () => {
-                let count = this.selection.getSelectedCount()
-                let sources = count
+                const count = this.selection.getSelectedCount()
+                const sources = count
                     ? (this.selection.getSelection() as RSSSource[])
                     : null
                 this.setState({
@@ -90,7 +90,7 @@ class SourcesTab extends React.Component<SourcesTabProps, SourcesTabState> {
 
     componentDidMount = () => {
         if (this.props.sids.length > 0) {
-            for (let sid of this.props.sids) {
+            for (const sid of this.props.sids) {
                 this.selection.setKeySelected(String(sid), true, false)
             }
             this.props.acknowledgeSIDs()
@@ -149,7 +149,7 @@ class SourcesTab extends React.Component<SourcesTabProps, SourcesTabState> {
     ]
 
     onFetchFrequencyChange = (_, option: IDropdownOption) => {
-        let frequency = parseInt(option.key as string)
+        const frequency = parseInt(option.key as string)
         this.props.updateFetchFrequency(this.state.selectedSource, frequency)
         this.setState({
             selectedSource: {
@@ -179,7 +179,7 @@ class SourcesTab extends React.Component<SourcesTabProps, SourcesTabState> {
     ]
 
     updateSourceName = () => {
-        let newName = this.state.newSourceName.trim()
+        const newName = this.state.newSourceName.trim()
         this.props.updateSourceName(this.state.selectedSource, newName)
         this.setState({
             selectedSource: {
@@ -190,7 +190,7 @@ class SourcesTab extends React.Component<SourcesTabProps, SourcesTabState> {
     }
 
     updateSourceIcon = () => {
-        let newIcon = this.state.newSourceIcon.trim()
+        const newIcon = this.state.newSourceIcon.trim()
         this.props.updateSourceIcon(this.state.selectedSource, newIcon)
         this.setState({
             selectedSource: { ...this.state.selectedSource, iconurl: newIcon },
@@ -204,12 +204,14 @@ class SourcesTab extends React.Component<SourcesTabProps, SourcesTabState> {
 
     addSource = (event: React.FormEvent) => {
         event.preventDefault()
-        let trimmed = this.state.newUrl.trim()
-        if (urlTest(trimmed)) this.props.addSource(trimmed)
+        const trimmed = this.state.newUrl.trim()
+        if (urlTest(trimmed)) {
+            this.props.addSource(trimmed)
+        }
     }
 
     onOpenTargetChange = (_, option: IChoiceGroupOption) => {
-        let newTarget = parseInt(option.key) as SourceOpenTarget
+        const newTarget = parseInt(option.key) as SourceOpenTarget
         this.props.updateSourceOpenTarget(this.state.selectedSource, newTarget)
         this.setState({
             selectedSource: {
@@ -348,7 +350,7 @@ class SourcesTab extends React.Component<SourcesTabProps, SourcesTabState> {
                                         }
                                         validateOnLoad={false}
                                         placeholder={intl.get(
-                                            "sources.inputUrl"
+                                            "sources.inputUrl",
                                         )}
                                         value={this.state.newSourceIcon}
                                         name="newSourceIcon"
@@ -359,7 +361,7 @@ class SourcesTab extends React.Component<SourcesTabProps, SourcesTabState> {
                                     <DefaultButton
                                         disabled={
                                             !urlTest(
-                                                this.state.newSourceIcon.trim()
+                                                this.state.newSourceIcon.trim(),
                                             )
                                         }
                                         onClick={this.updateSourceIcon}
@@ -381,7 +383,7 @@ class SourcesTab extends React.Component<SourcesTabProps, SourcesTabState> {
                                     <DefaultButton
                                         onClick={() =>
                                             window.utils.writeClipboard(
-                                                this.state.selectedSource.url
+                                                this.state.selectedSource.url,
                                             )
                                         }
                                         text={intl.get("context.copy")}
@@ -402,7 +404,7 @@ class SourcesTab extends React.Component<SourcesTabProps, SourcesTabState> {
                                                 .fetchFrequency
                                                 ? String(
                                                       this.state.selectedSource
-                                                          .fetchFrequency
+                                                          .fetchFrequency,
                                                   )
                                                 : "0"
                                         }
@@ -417,7 +419,7 @@ class SourcesTab extends React.Component<SourcesTabProps, SourcesTabState> {
                         label={intl.get("sources.openTarget")}
                         options={this.sourceOpenTargetChoices()}
                         selectedKey={String(
-                            this.state.selectedSource.openTarget
+                            this.state.selectedSource.openTarget,
                         )}
                         onChange={this.onOpenTargetChange}
                     />
@@ -438,7 +440,7 @@ class SourcesTab extends React.Component<SourcesTabProps, SourcesTabState> {
                                 <DangerButton
                                     onClick={() =>
                                         this.props.deleteSource(
-                                            this.state.selectedSource
+                                            this.state.selectedSource,
                                         )
                                     }
                                     key={this.state.selectedSource.sid}
@@ -464,7 +466,7 @@ class SourcesTab extends React.Component<SourcesTabProps, SourcesTabState> {
                                 <DangerButton
                                     onClick={() =>
                                         this.props.deleteSources(
-                                            this.state.selectedSources
+                                            this.state.selectedSources,
                                         )
                                     }
                                     text={intl.get("sources.delete")}
