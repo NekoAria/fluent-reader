@@ -10,7 +10,7 @@ jobs:
         runs-on: windows-latest
 
         steps:
-            - uses: actions/checkout@v2
+            - uses: actions/checkout@v4.1.1
 
             - name: Build and package the app
               run: |
@@ -27,7 +27,7 @@ jobs:
 
             - name: Create release
               id: create_release
-              uses: actions/create-release@v1
+              uses: actions/create-release@v1.1.4
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               with:
@@ -37,7 +37,7 @@ jobs:
                   prerelease: false
 
             - name: Upload x64 exe to release assets
-              uses: actions/upload-release-asset@v1
+              uses: actions/upload-release-asset@v1.1.3
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               with:
@@ -47,7 +47,7 @@ jobs:
                   asset_content_type: application/vnd.microsoft.portable-executable
 
             - name: Upload x86 exe to release assets
-              uses: actions/upload-release-asset@v1
+              uses: actions/upload-release-asset@v1.0.2
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               with:
@@ -57,7 +57,7 @@ jobs:
                   asset_content_type: application/vnd.microsoft.portable-executable
 
             - name: Upload x64 zip to release assets
-              uses: actions/upload-release-asset@v1
+              uses: actions/upload-release-asset@v1.0.2
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               with:
@@ -67,7 +67,7 @@ jobs:
                   asset_content_type: application/zip
 
             - name: Upload x86 zip to release assets
-              uses: actions/upload-release-asset@v1
+              uses: actions/upload-release-asset@v1.0.2
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               with:

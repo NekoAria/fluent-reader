@@ -1,7 +1,7 @@
 import * as React from "react"
 import intl from "react-intl-universal"
 import { Icon } from "@fluentui/react/lib/Icon"
-import { Nav, INavLink, INavLinkGroup } from "office-ui-fabric-react/lib/Nav"
+import { Nav, INavLink, INavLinkGroup } from "@fluentui/react/lib/Nav"
 import { SourceGroup } from "../schema-types"
 import { SourceState, RSSSource } from "../scripts/models/source"
 import { ALL } from "../scripts/models/feed"
@@ -23,7 +23,7 @@ export type MenuProps = {
     updateGroupExpansion: (
         event: React.MouseEvent<HTMLElement>,
         key: string,
-        selected: string
+        selected: string,
     ) => void
     toggleSearch: () => void
 }
@@ -51,7 +51,7 @@ export class Menu extends React.Component<MenuProps> {
                             Object.values(this.props.sources)
                                 .filter(s => !s.hidden)
                                 .map(s => s.unreadCount)
-                                .reduce((a, b) => a + b, 0)
+                                .reduce((a, b) => a + b, 0),
                         ),
                     key: ALL,
                     icon: "TextDocument",
@@ -67,7 +67,7 @@ export class Menu extends React.Component<MenuProps> {
                 .filter(g => g.sids.length > 0)
                 .map(g => {
                     if (g.isMultiple) {
-                        let sources = g.sids.map(sid => this.props.sources[sid])
+                        const sources = g.sids.map(sid => this.props.sources[sid])
                         return {
                             name: g.name,
                             ariaLabel:
@@ -75,7 +75,7 @@ export class Menu extends React.Component<MenuProps> {
                                 this.countOverflow(
                                     sources
                                         .map(s => s.unreadCount)
-                                        .reduce((a, b) => a + b, 0)
+                                        .reduce((a, b) => a + b, 0),
                                 ),
                             key: "g-" + g.index,
                             url: null,
@@ -110,7 +110,7 @@ export class Menu extends React.Component<MenuProps> {
 
     onContext = (item: INavLink, event: React.MouseEvent) => {
         let sids: number[]
-        let [type, index] = item.key.split("-")
+        const [type, index] = item.key.split("-")
         if (type === "s") {
             sids = [parseInt(index)]
         } else if (type === "g") {
@@ -122,13 +122,14 @@ export class Menu extends React.Component<MenuProps> {
     }
 
     _onRenderLink = (link: INavLink): JSX.Element => {
-        let count = link.ariaLabel.split(" ").pop()
+        const count = link.ariaLabel.split(" ").pop()
         return (
             <Stack
                 className="link-stack"
                 horizontal
                 grow
-                onContextMenu={event => this.onContext(link, event)}>
+                onContextMenu={event => this.onContext(link, event)}
+            >
                 <div className="link-text">{link.name}</div>
                 {count && count !== "0" && (
                     <div className="unread-count">{count}</div>
@@ -152,23 +153,27 @@ export class Menu extends React.Component<MenuProps> {
                     className={
                         "menu-container" + (this.props.display ? " show" : "")
                     }
-                    onClick={this.props.toggleMenu}>
+                    onClick={this.props.toggleMenu}
+                >
                     <div
                         className={
                             "menu" + (this.props.itemOn ? " item-on" : "")
                         }
-                        onClick={e => e.stopPropagation()}>
+                        onClick={e => e.stopPropagation()}
+                    >
                         <div className="btn-group">
                             <a
                                 className="btn hide-wide"
                                 title={intl.get("menu.close")}
-                                onClick={this.props.toggleMenu}>
+                                onClick={this.props.toggleMenu}
+                            >
                                 <Icon iconName="Back" />
                             </a>
                             <a
                                 className="btn inline-block-wide"
                                 title={intl.get("menu.close")}
-                                onClick={this.props.toggleMenu}>
+                                onClick={this.props.toggleMenu}
+                            >
                                 <Icon
                                     iconName={
                                         window.utils.platform === "darwin"
@@ -181,7 +186,8 @@ export class Menu extends React.Component<MenuProps> {
                         <FocusZone
                             as="div"
                             disabled={!this.props.display}
-                            className="nav-wrapper">
+                            className="nav-wrapper"
+                        >
                             <Nav
                                 onRenderGroupHeader={this._onRenderGroupHeader}
                                 onRenderLink={this._onRenderLink}
@@ -191,7 +197,7 @@ export class Menu extends React.Component<MenuProps> {
                                     this.props.updateGroupExpansion(
                                         event,
                                         item.key,
-                                        this.props.selected
+                                        this.props.selected,
                                     )
                                 }
                             />

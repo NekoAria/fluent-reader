@@ -6,9 +6,9 @@ import {
     FocusZone,
     FocusZoneDirection,
     List,
-} from "office-ui-fabric-react"
+    AnimationClassNames,
+} from "@fluentui/react"
 import { RSSItem } from "../../scripts/models/item"
-import { AnimationClassNames } from "@fluentui/react"
 import { ViewType } from "../../schema-types"
 import ListCard from "../cards/list-card"
 import MagazineCard from "../cards/magazine-card"
@@ -63,7 +63,9 @@ class ListFeed extends React.Component<FeedProps> {
             const result =
                 container.scrollTop >
                 container.scrollHeight - 2 * container.offsetHeight
-            if (!result) container.scrollTop += 100
+            if (!result) {
+                container.scrollTop += 100
+            }
             return result
         } else {
             return true
@@ -79,7 +81,8 @@ class ListFeed extends React.Component<FeedProps> {
                     direction={FocusZoneDirection.vertical}
                     className={this.getClassName()}
                     shouldReceiveFocus={this.canFocusChild}
-                    data-is-scrollable>
+                    data-is-scrollable
+                >
                     <List
                         className={AnimationClassNames.slideUpIn10}
                         items={this.props.items}

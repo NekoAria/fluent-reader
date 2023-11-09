@@ -12,7 +12,7 @@ import {
     IContextualMenuItem,
     ContextualMenuItemType,
     DirectionalHint,
-} from "office-ui-fabric-react/lib/ContextualMenu"
+} from "@fluentui/react/lib/ContextualMenu"
 import { ContextMenuType } from "../scripts/models/app"
 import { RSSItem } from "../scripts/models/item"
 import { ContextReduxProps } from "../containers/context-menu-container"
@@ -82,7 +82,7 @@ export class ContextMenu extends React.Component<ContextMenuProps> {
                             this.props.markRead(this.props.item)
                             this.props.showItem(
                                 this.props.feedId,
-                                this.props.item
+                                this.props.item,
                             )
                         },
                     },
@@ -94,7 +94,7 @@ export class ContextMenu extends React.Component<ContextMenuProps> {
                             this.props.markRead(this.props.item)
                             window.utils.openExternal(
                                 this.props.item.link,
-                                platformCtrl(e)
+                                platformCtrl(e),
                             )
                         },
                     },
@@ -110,9 +110,11 @@ export class ContextMenu extends React.Component<ContextMenuProps> {
                               }
                             : { iconName: "StatusCircleRing" },
                         onClick: () => {
-                            if (this.props.item.hasRead)
+                            if (this.props.item.hasRead) {
                                 this.props.markUnread(this.props.item)
-                            else this.props.markRead(this.props.item)
+                            } else {
+                                this.props.markRead(this.props.item)
+                            }
                         },
                         split: true,
                         subMenuProps: {
@@ -127,7 +129,7 @@ export class ContextMenu extends React.Component<ContextMenuProps> {
                                     onClick: () =>
                                         this.props.markAllRead(
                                             null,
-                                            this.props.item.date
+                                            this.props.item.date,
                                         ),
                                 },
                                 {
@@ -141,7 +143,7 @@ export class ContextMenu extends React.Component<ContextMenuProps> {
                                         this.props.markAllRead(
                                             null,
                                             this.props.item.date,
-                                            false
+                                            false,
                                         ),
                                 },
                             ],
@@ -213,49 +215,49 @@ export class ContextMenu extends React.Component<ContextMenuProps> {
                                           {
                                               key: "showCover",
                                               text: intl.get(
-                                                  "context.showCover"
+                                                  "context.showCover",
                                               ),
                                               canCheck: true,
                                               checked: Boolean(
                                                   this.props.viewConfigs &
-                                                      ViewConfigs.ShowCover
+                                                      ViewConfigs.ShowCover,
                                               ),
                                               onClick: () =>
                                                   this.props.setViewConfigs(
                                                       this.props.viewConfigs ^
-                                                          ViewConfigs.ShowCover
+                                                          ViewConfigs.ShowCover,
                                                   ),
                                           },
                                           {
                                               key: "showSnippet",
                                               text: intl.get(
-                                                  "context.showSnippet"
+                                                  "context.showSnippet",
                                               ),
                                               canCheck: true,
                                               checked: Boolean(
                                                   this.props.viewConfigs &
-                                                      ViewConfigs.ShowSnippet
+                                                      ViewConfigs.ShowSnippet,
                                               ),
                                               onClick: () =>
                                                   this.props.setViewConfigs(
                                                       this.props.viewConfigs ^
-                                                          ViewConfigs.ShowSnippet
+                                                          ViewConfigs.ShowSnippet,
                                                   ),
                                           },
                                           {
                                               key: "fadeRead",
                                               text: intl.get(
-                                                  "context.fadeRead"
+                                                  "context.fadeRead",
                                               ),
                                               canCheck: true,
                                               checked: Boolean(
                                                   this.props.viewConfigs &
-                                                      ViewConfigs.FadeRead
+                                                      ViewConfigs.FadeRead,
                                               ),
                                               onClick: () =>
                                                   this.props.setViewConfigs(
                                                       this.props.viewConfigs ^
-                                                          ViewConfigs.FadeRead
+                                                          ViewConfigs.FadeRead,
                                                   ),
                                           },
                                       ],
@@ -294,7 +296,7 @@ export class ContextMenu extends React.Component<ContextMenuProps> {
                                     onClick: e => {
                                         window.utils.openExternal(
                                             this.props.url,
-                                            platformCtrl(e)
+                                            platformCtrl(e),
                                         )
                                     },
                                 },
@@ -304,7 +306,7 @@ export class ContextMenu extends React.Component<ContextMenuProps> {
                                     iconProps: { iconName: "Link" },
                                     onClick: () => {
                                         window.utils.writeClipboard(
-                                            this.props.url
+                                            this.props.url,
                                         )
                                     },
                                 },
@@ -323,11 +325,11 @@ export class ContextMenu extends React.Component<ContextMenuProps> {
                         onClick: e => {
                             if (platformCtrl(e)) {
                                 window.utils.imageCallback(
-                                    ImageCallbackTypes.OpenExternalBg
+                                    ImageCallbackTypes.OpenExternalBg,
                                 )
                             } else {
                                 window.utils.imageCallback(
-                                    ImageCallbackTypes.OpenExternal
+                                    ImageCallbackTypes.OpenExternal,
                                 )
                             }
                         },
@@ -338,7 +340,7 @@ export class ContextMenu extends React.Component<ContextMenuProps> {
                         iconProps: { iconName: "SaveTemplate" },
                         onClick: () => {
                             window.utils.imageCallback(
-                                ImageCallbackTypes.SaveAs
+                                ImageCallbackTypes.SaveAs,
                             )
                         },
                     },
@@ -356,7 +358,7 @@ export class ContextMenu extends React.Component<ContextMenuProps> {
                         iconProps: { iconName: "Link" },
                         onClick: () => {
                             window.utils.imageCallback(
-                                ImageCallbackTypes.CopyLink
+                                ImageCallbackTypes.CopyLink,
                             )
                         },
                     },
@@ -400,7 +402,7 @@ export class ContextMenu extends React.Component<ContextMenuProps> {
                                         ViewType.Magazine,
                                     onClick: () =>
                                         this.props.switchView(
-                                            ViewType.Magazine
+                                            ViewType.Magazine,
                                         ),
                                 },
                                 {
@@ -435,7 +437,7 @@ export class ContextMenu extends React.Component<ContextMenuProps> {
                                         FilterType.Default,
                                     onClick: () =>
                                         this.props.switchFilter(
-                                            FilterType.Default
+                                            FilterType.Default,
                                         ),
                                 },
                                 {
@@ -455,7 +457,7 @@ export class ContextMenu extends React.Component<ContextMenuProps> {
                                         FilterType.UnreadOnly,
                                     onClick: () =>
                                         this.props.switchFilter(
-                                            FilterType.UnreadOnly
+                                            FilterType.UnreadOnly,
                                         ),
                                 },
                                 {
@@ -469,7 +471,7 @@ export class ContextMenu extends React.Component<ContextMenuProps> {
                                         FilterType.StarredOnly,
                                     onClick: () =>
                                         this.props.switchFilter(
-                                            FilterType.StarredOnly
+                                            FilterType.StarredOnly,
                                         ),
                                 },
                             ],
@@ -499,7 +501,7 @@ export class ContextMenu extends React.Component<ContextMenuProps> {
                                     ),
                                     onClick: () =>
                                         this.props.toggleFilter(
-                                            FilterType.CaseInsensitive
+                                            FilterType.CaseInsensitive,
                                         ),
                                 },
                                 {
@@ -509,11 +511,11 @@ export class ContextMenu extends React.Component<ContextMenuProps> {
                                     canCheck: true,
                                     checked: Boolean(
                                         this.props.filter &
-                                            FilterType.FullSearch
+                                            FilterType.FullSearch,
                                     ),
                                     onClick: () =>
                                         this.props.toggleFilter(
-                                            FilterType.FullSearch
+                                            FilterType.FullSearch,
                                         ),
                                 },
                             ],
@@ -524,7 +526,7 @@ export class ContextMenu extends React.Component<ContextMenuProps> {
                         text: intl.get("context.showHidden"),
                         canCheck: true,
                         checked: Boolean(
-                            this.props.filter & FilterType.ShowHidden
+                            this.props.filter & FilterType.ShowHidden,
                         ),
                         onClick: () =>
                             this.props.toggleFilter(FilterType.ShowHidden),
@@ -569,7 +571,7 @@ export class ContextMenu extends React.Component<ContextMenuProps> {
                                     key: "1d",
                                     text: intl.get("app.daysAgo", { days: 1 }),
                                     onClick: () => {
-                                        let date = new Date()
+                                        const date = new Date()
                                         date.setTime(date.getTime() - 86400000)
                                         this.props.markAllRead(null, date)
                                     },
@@ -578,9 +580,9 @@ export class ContextMenu extends React.Component<ContextMenuProps> {
                                     key: "3d",
                                     text: intl.get("app.daysAgo", { days: 3 }),
                                     onClick: () => {
-                                        let date = new Date()
+                                        const date = new Date()
                                         date.setTime(
-                                            date.getTime() - 3 * 86400000
+                                            date.getTime() - 3 * 86400000,
                                         )
                                         this.props.markAllRead(null, date)
                                     },
@@ -589,9 +591,9 @@ export class ContextMenu extends React.Component<ContextMenuProps> {
                                     key: "7d",
                                     text: intl.get("app.daysAgo", { days: 7 }),
                                     onClick: () => {
-                                        let date = new Date()
+                                        const date = new Date()
                                         date.setTime(
-                                            date.getTime() - 7 * 86400000
+                                            date.getTime() - 7 * 86400000,
                                         )
                                         this.props.markAllRead(null, date)
                                     },

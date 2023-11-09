@@ -1,6 +1,6 @@
 import * as React from "react"
 import intl from "react-intl-universal"
-import md5 from "js-md5"
+import { md5 } from "js-md5"
 import { ServiceConfigsTabProps } from "../service"
 import { FeverConfigs } from "../../../scripts/models/services/fever"
 import { SyncService } from "../../../schema-types"
@@ -90,10 +90,11 @@ class FeverConfigsTab extends React.Component<
                 endpoint: this.state.endpoint,
                 fetchLimit: this.state.fetchLimit,
             } as FeverConfigs
-            if (this.state.password)
+            if (this.state.password) {
                 configs.apiKey = md5(
-                    `${configs.username}:${this.state.password}`
+                    `${configs.username}:${this.state.password}`,
                 )
+            }
         } else {
             configs = {
                 type: SyncService.Fever,
@@ -102,7 +103,9 @@ class FeverConfigsTab extends React.Component<
                 fetchLimit: this.state.fetchLimit,
                 apiKey: md5(`${this.state.username}:${this.state.password}`),
             }
-            if (this.state.importGroups) configs.importGroups = true
+            if (this.state.importGroups) {
+                configs.importGroups = true
+            }
         }
         this.props.blockActions()
         const valid = await this.props.authenticate(configs)
@@ -114,7 +117,7 @@ class FeverConfigsTab extends React.Component<
             this.props.blockActions()
             window.utils.showErrorBox(
                 intl.get("service.failure"),
-                intl.get("service.failureHint")
+                intl.get("service.failureHint"),
             )
         }
     }

@@ -4,7 +4,6 @@ import {
     TouchBarTexts,
     WindowStateListenerType,
 } from "../schema-types"
-import { IObjectWithKey } from "@fluentui/react"
 
 const utilsBridge = {
     platform: process.platform,
@@ -27,7 +26,7 @@ const utilsBridge = {
         confirm: string,
         cancel: string,
         defaultCancel = false,
-        type = "none"
+        type = "none",
     ) => {
         return (await ipcRenderer.invoke(
             "show-message-box",
@@ -36,15 +35,15 @@ const utilsBridge = {
             confirm,
             cancel,
             defaultCancel,
-            type
+            type,
         )) as boolean
     },
 
     showSaveDialog: async (filters: Electron.FileFilter[], path: string) => {
-        let result = (await ipcRenderer.invoke(
+        const result = (await ipcRenderer.invoke(
             "show-save-dialog",
             filters,
-            path
+            path,
         )) as boolean
         if (result) {
             return (result: string, errmsg: string) => {
@@ -68,7 +67,7 @@ const utilsBridge = {
     },
 
     addMainContextListener: (
-        callback: (pos: [number, number], text: string) => any
+        callback: (pos: [number, number], text: string) => any,
     ) => {
         ipcRenderer.removeAllListeners("window-context-menu")
         ipcRenderer.on("window-context-menu", (_, pos, text) => {
@@ -76,7 +75,7 @@ const utilsBridge = {
         })
     },
     addWebviewContextListener: (
-        callback: (pos: [number, number], text: string, url: string) => any
+        callback: (pos: [number, number], text: string, url: string) => any,
     ) => {
         ipcRenderer.removeAllListeners("webview-context-menu")
         ipcRenderer.on("webview-context-menu", (_, pos, text, url) => {
@@ -130,7 +129,7 @@ const utilsBridge = {
         ipcRenderer.invoke("request-attention")
     },
     addWindowStateListener: (
-        callback: (type: WindowStateListenerType, state: boolean) => any
+        callback: (type: WindowStateListenerType, state: boolean) => any,
     ) => {
         ipcRenderer.removeAllListeners("maximized")
         ipcRenderer.on("maximized", () => {

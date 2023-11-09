@@ -3,7 +3,6 @@ import intl from "react-intl-universal"
 import { Icon } from "@fluentui/react/lib/Icon"
 import { AppState } from "../scripts/models/app"
 import { ProgressIndicator, IObjectWithKey } from "@fluentui/react"
-import { getWindowBreakpoint } from "../scripts/utils"
 import { WindowStateListenerType } from "../schema-types"
 
 type NavProps = {
@@ -34,13 +33,19 @@ class Nav extends React.Component<NavProps, NavState> {
     }
 
     setBodyFocusState = (focused: boolean) => {
-        if (focused) document.body.classList.remove("blur")
-        else document.body.classList.add("blur")
+        if (focused) {
+            document.body.classList.remove("blur")
+        } else {
+            document.body.classList.add("blur")
+        }
     }
 
     setBodyFullscreenState = (fullscreen: boolean) => {
-        if (fullscreen) document.body.classList.remove("not-fullscreen")
-        else document.body.classList.add("not-fullscreen")
+        if (fullscreen) {
+            document.body.classList.remove("not-fullscreen")
+        } else {
+            document.body.classList.add("not-fullscreen")
+        }
     }
 
     windowStateListener = (type: WindowStateListenerType, state: boolean) => {
@@ -73,13 +78,19 @@ class Nav extends React.Component<NavProps, NavState> {
                     this.props.markAllRead()
                     break
                 case "F7":
-                    if (!this.props.itemShown) this.props.logs()
+                    if (!this.props.itemShown) {
+                        this.props.logs()
+                    }
                     break
                 case "F8":
-                    if (!this.props.itemShown) this.props.views()
+                    if (!this.props.itemShown) {
+                        this.props.views()
+                    }
                     break
                 case "F9":
-                    if (!this.props.itemShown) this.props.settings()
+                    if (!this.props.itemShown) {
+                        this.props.settings()
+                    }
                     break
             }
         }
@@ -87,8 +98,9 @@ class Nav extends React.Component<NavProps, NavState> {
 
     componentDidMount() {
         document.addEventListener("keydown", this.navShortcutsHandler)
-        if (window.utils.platform === "darwin")
+        if (window.utils.platform === "darwin") {
             window.utils.addTouchBarEventsListener(this.navShortcutsHandler)
+        }
     }
     componentWillUnmount() {
         document.removeEventListener("keydown", this.navShortcutsHandler)
@@ -110,17 +122,25 @@ class Nav extends React.Component<NavProps, NavState> {
         this.props.state.feedInit &&
         !this.props.state.syncing &&
         !this.props.state.fetchingItems
-    fetching = () => (!this.canFetch() ? " fetching" : "")
+    fetching = () => (this.canFetch() ? "" : " fetching")
     getClassNames = () => {
         const classNames = new Array<string>()
-        if (this.props.state.settings.display) classNames.push("hide-btns")
-        if (this.props.state.menu) classNames.push("menu-on")
-        if (this.props.itemShown) classNames.push("item-on")
+        if (this.props.state.settings.display) {
+            classNames.push("hide-btns")
+        }
+        if (this.props.state.menu) {
+            classNames.push("menu-on")
+        }
+        if (this.props.itemShown) {
+            classNames.push("item-on")
+        }
         return classNames.join(" ")
     }
 
     fetch = () => {
-        if (this.canFetch()) this.props.fetch()
+        if (this.canFetch()) {
+            this.props.fetch()
+        }
     }
 
     views = () => {
@@ -194,8 +214,9 @@ class Nav extends React.Component<NavProps, NavState> {
                             if (
                                 this.props.state.contextMenu.event ===
                                 "#view-toggle"
-                            )
+                            ) {
                                 e.stopPropagation()
+                            }
                         }}>
                         <Icon iconName="View" />
                     </a>

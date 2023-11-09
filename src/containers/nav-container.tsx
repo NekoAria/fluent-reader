@@ -2,7 +2,7 @@ import intl from "react-intl-universal"
 import { connect } from "react-redux"
 import { createSelector } from "reselect"
 import { RootState } from "../scripts/reducer"
-import { fetchItems, markAllRead } from "../scripts/models/item"
+import { fetchItems } from "../scripts/models/item"
 import {
     toggleMenu,
     toggleLogMenu,
@@ -23,7 +23,7 @@ const mapStateToProps = createSelector(
     (state, itemShown) => ({
         state: state,
         itemShown: itemShown,
-    })
+    }),
 )
 
 const mapDispatchToProps = dispatch => ({
